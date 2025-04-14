@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Truck, HeadphonesFilled, CreditCard } from "lucide-react";
+import { ShieldCheck, Truck, Headphones, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 
 const benefits = [
@@ -15,7 +15,7 @@ const benefits = [
     description: "Todos nuestros productos cuentan con garantía de 12 meses como mínimo."
   },
   {
-    icon: HeadphonesFilled,
+    icon: Headphones,
     title: "Soporte Personalizado",
     description: "Nuestro equipo está disponible para asesorarte antes, durante y después de tu compra."
   },
