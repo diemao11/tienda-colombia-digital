@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { 
-  ArrowLeft, CreditCard, Landmark, Shield, ShoppingBag 
+  ArrowLeft, CreditCard, Landmark, Shield, ShoppingBag, Banknote, Home 
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
@@ -19,6 +19,18 @@ const CheckoutPage = () => {
   const { cart, totalPrice, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
   const [loading, setLoading] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [totalWithDelivery, setTotalWithDelivery] = useState(0);
+
+  // Actualiza el costo de envío y el total cuando cambia el método de pago
+  useEffect(() => {
+    // Solo envío gratis para pagos en línea (creditCard, pse) y compras mayores a 500000
+    const isFreeShipping = (paymentMethod === "creditCard" || paymentMethod === "pse") && totalPrice > 500000;
+    const newDeliveryFee = isFreeShipping ? 0 : 15000;
+    
+    setDeliveryFee(newDeliveryFee);
+    setTotalWithDelivery(totalPrice + newDeliveryFee);
+  }, [paymentMethod, totalPrice]);
 
   if (cart.length === 0) {
     return (
@@ -37,9 +49,6 @@ const CheckoutPage = () => {
       </div>
     );
   }
-
-  const deliveryFee = totalPrice > 500000 ? 0 : 15000;
-  const totalWithDelivery = totalPrice + deliveryFee;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +169,22 @@ const CheckoutPage = () => {
                         PSE - Pagos Seguros en Línea
                       </Label>
                     </div>
+                    {/* Opción de Crédito */}
+                    <div className="flex items-center space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50">
+                      <RadioGroupItem value="credit" id="credit" />
+                      <Label htmlFor="credit" className="flex items-center cursor-pointer flex-1">
+                        <CreditCard className="h-5 w-5 mr-2 text-gray-600" />
+                        Crédito (Envío no incluido)
+                      </Label>
+                    </div>
+                    {/* Opción de Pago Contra Entrega */}
+                    <div className="flex items-center space-x-2 border rounded-md p-3 cursor-pointer hover:bg-gray-50">
+                      <RadioGroupItem value="cashOnDelivery" id="cashOnDelivery" />
+                      <Label htmlFor="cashOnDelivery" className="flex items-center cursor-pointer flex-1">
+                        <Banknote className="h-5 w-5 mr-2 text-gray-600" />
+                        Pago Contra Entrega (Envío no incluido)
+                      </Label>
+                    </div>
                   </RadioGroup>
 
                   {paymentMethod === "creditCard" && (
@@ -189,6 +214,34 @@ const CheckoutPage = () => {
                             required 
                           />
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === "credit" && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-sm text-amber-800">
+                          <strong>Información importante:</strong> Al seleccionar la opción de crédito, un asesor se pondrá en contacto con usted para validar su información y tramitar su crédito. El envío no está incluido y se cobrará al momento de la entrega.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="idNumber">Número de Identificación (Cédula)</Label>
+                        <Input 
+                          id="idNumber" 
+                          placeholder="Ingrese su número de cédula" 
+                          required 
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === "cashOnDelivery" && (
+                    <div className="mt-4">
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-sm text-amber-800">
+                          <strong>Información importante:</strong> Con el pago contra entrega, usted pagará el valor total del pedido más el costo de envío al momento de recibir su compra. Tenga el valor exacto disponible para facilitar la entrega.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -251,7 +304,12 @@ const CheckoutPage = () => {
                 </div>
                 {deliveryFee === 0 && (
                   <div className="text-xs text-green-600">
-                    ¡Has aplicado envío gratis por compra superior a COP 500.000!
+                    ¡Has aplicado envío gratis por compra superior a COP 500.000 con pago en línea!
+                  </div>
+                )}
+                {(paymentMethod === "credit" || paymentMethod === "cashOnDelivery") && (
+                  <div className="text-xs text-amber-600">
+                    Nota: El costo de envío se aplica para los métodos de pago a crédito y contra entrega.
                   </div>
                 )}
                 <Separator />
