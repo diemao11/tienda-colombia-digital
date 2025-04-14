@@ -3,7 +3,8 @@ import { useState } from "react";
 import ProductCard from "./ProductCard";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
-import { Radio } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ProductGridProps {
   products: Product[];
@@ -34,7 +35,7 @@ const ProductGrid = ({ products, title }: ProductGridProps) => {
               onClick={() => setLayout("grid")}
               aria-label="Vista de cuadrícula"
             >
-              <Radio className="h-4 w-4" />
+              <LayoutGrid className="h-4 w-4" />
               <span className="ml-1 hidden sm:inline">Cuadrícula</span>
             </Button>
             <Button
@@ -43,7 +44,7 @@ const ProductGrid = ({ products, title }: ProductGridProps) => {
               onClick={() => setLayout("list")}
               aria-label="Vista de lista"
             >
-              <Radio className="h-4 w-4" />
+              <List className="h-4 w-4" />
               <span className="ml-1 hidden sm:inline">Lista</span>
             </Button>
           </div>
@@ -52,14 +53,29 @@ const ProductGrid = ({ products, title }: ProductGridProps) => {
 
       {layout === "grid" ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {products.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              viewport={{ once: true, margin: "-50px" }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
           ))}
         </div>
       ) : (
         <div className="space-y-4">
-          {products.map((product) => (
-            <div key={product.id} className="border rounded-lg p-4 flex flex-col md:flex-row">
+          {products.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              viewport={{ once: true, margin: "-50px" }}
+              className="border rounded-lg p-4 flex flex-col md:flex-row"
+            >
               <div className="md:w-48 h-48 flex-shrink-0 mb-4 md:mb-0 md:mr-4">
                 <img
                   src={product.images[0] || "/placeholder.svg"}
@@ -79,10 +95,10 @@ const ProductGrid = ({ products, title }: ProductGridProps) => {
                       maximumFractionDigits: 0
                     }).format(product.price)}
                   </p>
-                  <Button>Añadir al carrito</Button>
+                  <Button className="bg-brand-600 hover:bg-brand-700">Añadir al carrito</Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
