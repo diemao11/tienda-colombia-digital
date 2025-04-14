@@ -2,7 +2,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Product, formatPrice } from "@/data/products";
+import { formatPrice } from "@/data/products";
+import { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Star } from "lucide-react";
