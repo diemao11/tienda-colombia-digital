@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
-import { EnvelopeOpen } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const NewsletterSection = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ const NewsletterSection = () => {
         >
           <div className="flex justify-center mb-6">
             <div className="bg-brand-600 rounded-full p-3 inline-block">
-              <EnvelopeOpen className="h-6 w-6 text-white" />
+              <Mail className="h-6 w-6 text-white" />
             </div>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Suscríbete a nuestro newsletter</h2>
