@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, ShieldCheck, Truck, HeadphonesFilled, CreditCard } from "lucide-react";
+import { ArrowRight, ShieldCheck, Truck, Headphones, CreditCard } from "lucide-react";
 import { products } from "@/data/products";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedCategories from "@/components/home/FeaturedCategories";

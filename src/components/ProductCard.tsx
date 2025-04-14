@@ -6,7 +6,8 @@ import { formatPrice } from "@/data/products";
 import { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ProductCardProps {
   product: Product;
@@ -27,21 +28,30 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : "/placeholder.svg";
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col transition-all hover:shadow-lg border-none">
-      <Link to={`/producto/${product.id}`} className="flex-1 flex flex-col group">
-        <div className="relative pt-[100%] bg-gray-100 overflow-hidden">
+    <Card className="overflow-hidden h-full flex flex-col transition-all hover:shadow-lg border border-gray-100 rounded-xl group">
+      <Link to={`/producto/${product.id}`} className="flex-1 flex flex-col">
+        <div className="relative pt-[100%] bg-gray-50 overflow-hidden">
           <img
             src={imageUrl}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover product-image transition-transform duration-300 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-cover product-image transition-transform duration-500 group-hover:scale-105"
           />
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-all"
+            >
+              <Heart className="h-4 w-4 text-gray-600" />
+            </motion.button>
+          </div>
           {product.stock <= 3 && product.stock > 0 && (
-            <Badge className="absolute top-2 right-2 bg-yellow-500 text-white">
+            <Badge className="absolute top-2 left-2 bg-yellow-500 text-white">
               ¡Pocas unidades!
             </Badge>
           )}
           {product.stock === 0 && (
-            <Badge className="absolute top-2 right-2 bg-red-500 text-white">
+            <Badge className="absolute top-2 left-2 bg-red-500 text-white">
               Agotado
             </Badge>
           )}
@@ -67,7 +77,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </Link>
       <CardFooter className="p-4 pt-0">
         <Button 
-          className="w-full bg-brand-600 hover:bg-brand-700 transition-all" 
+          className="w-full bg-brand-600 hover:bg-brand-700 transition-all shadow-sm" 
           onClick={handleAddToCart}
           disabled={product.stock === 0}
           variant={product.stock === 0 ? "outline" : "default"}
