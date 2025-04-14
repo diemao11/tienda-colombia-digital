@@ -1,169 +1,145 @@
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Menu, X, Search, User } from "lucide-react";
+import { 
+  NavigationMenu, 
+  NavigationMenuContent, 
+  NavigationMenuItem, 
+  NavigationMenuLink, 
+  NavigationMenuList, 
+  NavigationMenuTrigger 
+} from "@/components/ui/navigation-menu";
+import { ShoppingCart, LayoutDashboard } from "lucide-react"; 
 import { useCart } from "@/context/CartContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 
 const Navbar = () => {
-  const { totalItems } = useCart();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const categories = [
-    { 
-      name: "Muebles", 
-      path: "/categoria/furniture",
-      subcategories: ["Sillas", "Escritorios", "Sofás", "Estanterías"] 
-    },
-    { 
-      name: "Electrónica", 
-      path: "/categoria/electronics",
-      subcategories: ["Televisores", "Audio", "Accesorios"] 
-    },
-    { 
-      name: "Tecnología", 
-      path: "/categoria/technology",
-      subcategories: ["Laptops", "Smartphones", "Tablets", "Periféricos"] 
-    },
-  ];
+  const { cart } = useCart();
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-brand-600">TiendaColombia</span>
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 max-w-screen-xl items-center justify-between">
+        <div className="flex gap-6 md:gap-10">
+          <Link to="/" className="hidden items-center space-x-2 md:flex">
+            <span className="text-xl font-bold tracking-tight">TiendaColombia</span>
           </Link>
-
-          {/* Desktop Menu */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {categories.map((category) => (
-              <DropdownMenu key={category.name}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="p-0 text-foreground">
-                    {category.name}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild>
-                    <Link to={category.path} className="w-full">
-                      Ver todo {category.name}
-                    </Link>
-                  </DropdownMenuItem>
-                  {category.subcategories.map((subcategory) => (
-                    <DropdownMenuItem key={subcategory} asChild>
-                      <Link to={`${category.path}/${subcategory.toLowerCase()}`} className="w-full">
-                        {subcategory}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ))}
-          </nav>
-
-          {/* Right side icons */}
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" aria-label="Buscar">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" aria-label="Mi cuenta">
-              <User className="h-5 w-5" />
-            </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Carrito" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-                      {totalItems}
-                    </span>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Carrito de Compras</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4">
-                  <Link to="/carrito">
-                    <Button className="w-full">Ver carrito</Button>
-                  </Link>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={toggleMenu}
-              aria-label="Menu"
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link to="/">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Inicio
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Productos</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/tienda"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Todos los productos
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Explora nuestro catálogo completo de productos
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <ListItem to="/categoria/furniture" title="Muebles">
+                      Sillas, escritorios, sofás y más
+                    </ListItem>
+                    <ListItem to="/categoria/electronics" title="Electrónica">
+                      Televisores, sistemas de sonido y accesorios
+                    </ListItem>
+                    <ListItem to="/categoria/technology" title="Tecnología">
+                      Laptops, smartphones y tablets
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/nosotros">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Nosotros
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link to="/contacto">
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Contacto
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="mb-4">
-              <Input placeholder="Buscar productos..." />
-            </div>
-            <nav className="flex flex-col space-y-4">
-              {categories.map((category) => (
-                <div key={category.name} className="space-y-2">
-                  <Link
-                    to={category.path}
-                    className="font-medium"
-                    onClick={toggleMenu}
-                  >
-                    {category.name}
-                  </Link>
-                  <div className="pl-4 space-y-2">
-                    {category.subcategories.map((subcategory) => (
-                      <Link
-                        key={subcategory}
-                        to={`${category.path}/${subcategory.toLowerCase()}`}
-                        className="block text-muted-foreground"
-                        onClick={toggleMenu}
-                      >
-                        {subcategory}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </nav>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/admin">
+              <LayoutDashboard className="h-5 w-5" />
+              <span className="sr-only">Panel de administración</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon" asChild className="relative">
+            <Link to="/carrito">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="sr-only">Carrito de compras</span>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-primary-foreground">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+          </Button>
+        </div>
       </div>
     </header>
+  );
+};
+
+const ListItem = ({
+  className,
+  title,
+  children,
+  to,
+  ...props
+}: {
+  className?: string;
+  title: string;
+  children: React.ReactNode;
+  to: string;
+}) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          to={to}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+};
+
+const navigationMenuTriggerStyle = () => {
+  return cn(
+    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
   );
 };
 

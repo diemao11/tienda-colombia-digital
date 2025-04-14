@@ -21,6 +21,12 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProductsPage from "./pages/admin/ProductsPage";
+import CustomersPage from "./pages/admin/CustomersPage";
+import OrdersPage from "./pages/admin/OrdersPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +40,7 @@ const App = () => (
             <Navbar />
             <main className="flex-1">
               <Routes>
+                {/* Rutas de la tienda */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/tienda" element={<ShopPage />} />
                 <Route path="/categoria/:category" element={<CategoryPage />} />
@@ -44,6 +51,14 @@ const App = () => (
                 <Route path="/pedido-exitoso" element={<OrderSuccessPage />} />
                 <Route path="/nosotros" element={<AboutPage />} />
                 <Route path="/contacto" element={<ContactPage />} />
+                
+                {/* Rutas del panel de administración */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/productos" element={<ProductsPage />} />
+                <Route path="/admin/clientes" element={<CustomersPage />} />
+                <Route path="/admin/pedidos" element={<OrdersPage />} />
+                
+                {/* Ruta 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
@@ -56,3 +71,4 @@ const App = () => (
 );
 
 export default App;
+
