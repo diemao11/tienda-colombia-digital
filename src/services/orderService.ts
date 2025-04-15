@@ -26,7 +26,9 @@ export const fetchOrders = async () => {
     let lastName = '';
     
     // Manejar perfiles de manera segura
-    if (item.profiles && typeof item.profiles === 'object' && item.profiles !== null) {
+    if (item.profiles && 
+        typeof item.profiles === 'object' && 
+        item.profiles !== null) {
       firstName = item.profiles.first_name || '';
       lastName = item.profiles.last_name || '';
     }
@@ -75,8 +77,9 @@ export const fetchOrderWithItems = async (id: string) => {
   let lastName = '';
   let phone = '';
   
-  // Manejar perfiles de manera segura
-  if (order.profiles && typeof order.profiles === 'object' && order.profiles !== null) {
+  if (order.profiles && 
+      typeof order.profiles === 'object' && 
+      order.profiles !== null) {
     firstName = order.profiles.first_name || '';
     lastName = order.profiles.last_name || '';
     phone = order.profiles.phone || '';

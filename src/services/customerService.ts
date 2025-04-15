@@ -42,9 +42,13 @@ export const fetchCustomers = async () => {
     const lastOrder = orders.length > 0 ? orders[0].created_at : null;
     
     // Extraer correo del usuario de manera segura
-    const email = profile.auth_users ? 
-      (typeof profile.auth_users === 'object' && profile.auth_users !== null && 'email' in profile.auth_users ? 
-        String(profile.auth_users.email) : 'Sin email') : 'Sin email';
+    let email = 'Sin email';
+    if (profile.auth_users && 
+        typeof profile.auth_users === 'object' && 
+        profile.auth_users !== null && 
+        'email' in profile.auth_users) {
+      email = String(profile.auth_users.email);
+    }
     
     // Construir el objeto de cliente
     customers.push({
@@ -83,9 +87,13 @@ export const fetchCustomerDetails = async (id: string) => {
   if (ordersError) throw ordersError;
 
   // Extraer correo del usuario de manera segura
-  const email = profile.auth_users ? 
-    (typeof profile.auth_users === 'object' && profile.auth_users !== null && 'email' in profile.auth_users ? 
-      String(profile.auth_users.email) : '') : '';
+  let email = '';
+  if (profile.auth_users && 
+      typeof profile.auth_users === 'object' && 
+      profile.auth_users !== null && 
+      'email' in profile.auth_users) {
+    email = String(profile.auth_users.email);
+  }
 
   return {
     id: profile.id,
