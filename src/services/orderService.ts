@@ -26,11 +26,12 @@ export const fetchOrders = async () => {
     let lastName = '';
     
     // Manejar perfiles de manera segura
-    if (item.profiles && 
-        typeof item.profiles === 'object' && 
-        item.profiles !== null) {
-      firstName = item.profiles.first_name || '';
-      lastName = item.profiles.last_name || '';
+    const profiles = item.profiles || null;
+    
+    if (profiles !== null && 
+        typeof profiles === 'object') {
+      firstName = profiles.first_name || '';
+      lastName = profiles.last_name || '';
     }
     
     const customerName = firstName && lastName 
@@ -77,12 +78,13 @@ export const fetchOrderWithItems = async (id: string) => {
   let lastName = '';
   let phone = '';
   
-  if (order.profiles && 
-      typeof order.profiles === 'object' && 
-      order.profiles !== null) {
-    firstName = order.profiles.first_name || '';
-    lastName = order.profiles.last_name || '';
-    phone = order.profiles.phone || '';
+  const profiles = order.profiles || null;
+  
+  if (profiles !== null && 
+      typeof profiles === 'object') {
+    firstName = profiles.first_name || '';
+    lastName = profiles.last_name || '';
+    phone = profiles.phone || '';
   }
   
   const customerName = firstName && lastName 

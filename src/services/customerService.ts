@@ -43,11 +43,12 @@ export const fetchCustomers = async () => {
     
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
-    if (profile.auth_users && 
-        typeof profile.auth_users === 'object' && 
-        profile.auth_users !== null && 
-        'email' in profile.auth_users) {
-      email = String(profile.auth_users.email);
+    const authUsers = profile.auth_users || null;
+    
+    if (authUsers !== null && 
+        typeof authUsers === 'object' && 
+        'email' in authUsers) {
+      email = String(authUsers.email);
     }
     
     // Construir el objeto de cliente
@@ -88,11 +89,12 @@ export const fetchCustomerDetails = async (id: string) => {
 
   // Extraer correo del usuario de manera segura
   let email = '';
-  if (profile.auth_users && 
-      typeof profile.auth_users === 'object' && 
-      profile.auth_users !== null && 
-      'email' in profile.auth_users) {
-    email = String(profile.auth_users.email);
+  const authUsers = profile.auth_users || null;
+  
+  if (authUsers !== null && 
+      typeof authUsers === 'object' && 
+      'email' in authUsers) {
+    email = String(authUsers.email);
   }
 
   return {
