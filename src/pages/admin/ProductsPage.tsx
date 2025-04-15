@@ -4,16 +4,23 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice, products } from "@/data/products";
 import { Product } from "@/types/product";
 import { Link } from "react-router-dom";
 import AddProductModal from "@/components/admin/AddProductModal";
+import DeleteProductDialog from "@/components/admin/DeleteProductDialog";
+import EditProductModal from "@/components/admin/EditProductModal";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showEditProductModal, setShowEditProductModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { toast } = useToast();
   
   // Función para filtrar productos por nombre
   const filteredProducts = products.filter(product => 
@@ -27,6 +34,16 @@ export default function ProductsPage() {
       case 'technology': return 'Tecnología';
       default: return category;
     }
+  };
+
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setShowEditProductModal(true);
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setShowDeleteDialog(true);
   };
 
   return (
@@ -94,13 +111,11 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link to={`/admin/productos/editar/${product.id}`}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Editar</span>
-                          </Link>
+                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(product)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Eliminar</span>
                         </Button>
@@ -124,6 +139,22 @@ export default function ProductsPage() {
         open={showAddProductModal} 
         onOpenChange={setShowAddProductModal} 
       />
+      
+      {selectedProduct && (
+        <>
+          <EditProductModal 
+            open={showEditProductModal} 
+            onOpenChange={setShowEditProductModal}
+            product={selectedProduct}
+          />
+          
+          <DeleteProductDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            product={selectedProduct}
+          />
+        </>
+      )}
     </AdminLayout>
   );
 }

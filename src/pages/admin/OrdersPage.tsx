@@ -2,27 +2,45 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import OrderStatusMenu from "@/components/admin/OrderStatusMenu";
+import OrderDetailsModal from "@/components/admin/OrderDetailsModal";
+
+// Tipo para pedidos
+export type OrderStatus = "pending" | "processing" | "shipping" | "completed" | "cancelled";
+
+export interface Order {
+  id: string;
+  customer: string;
+  date: string;
+  total: number;
+  status: OrderStatus;
+  items: number;
+}
 
 // Datos de ejemplo para pedidos
-const mockOrders = [
+const mockOrders: Order[] = [
   { id: "ORD-001", customer: "Carlos Rodríguez", date: "2023-12-15", total: 750000, status: "completed", items: 3 },
   { id: "ORD-002", customer: "Ana Martínez", date: "2023-12-20", total: 450000, status: "processing", items: 2 },
   { id: "ORD-003", customer: "Juan Pérez", date: "2024-01-05", total: 1200000, status: "completed", items: 5 },
   { id: "ORD-004", customer: "María López", date: "2024-01-10", total: 350000, status: "cancelled", items: 1 },
   { id: "ORD-005", customer: "Luis Torres", date: "2024-01-15", total: 680000, status: "pending", items: 2 },
+  { id: "ORD-006", customer: "Sofia Ramírez", date: "2024-04-10", total: 920000, status: "shipping", items: 4 },
 ];
 
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
   
   // Función para filtrar pedidos
-  const filteredOrders = mockOrders.filter(order => 
+  const filteredOrders = orders.filter(order => 
     (order.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
      order.customer.toLowerCase().includes(searchQuery.toLowerCase())) &&
     (statusFilter === "all" || order.status === statusFilter)
@@ -45,19 +63,18 @@ export default function OrdersPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case "completed":
-        return <Badge className="bg-green-500">Completado</Badge>;
-      case "processing":
-        return <Badge className="bg-blue-500">En proceso</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-500">Pendiente</Badge>;
-      case "cancelled":
-        return <Badge className="bg-red-500">Cancelado</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
+  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+    // Actualizar el estado del pedido
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
   };
 
   return (
@@ -89,9 +106,10 @@ export default function OrdersPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="completed">Completados</SelectItem>
-                <SelectItem value="processing">En proceso</SelectItem>
                 <SelectItem value="pending">Pendientes</SelectItem>
+                <SelectItem value="processing">En proceso</SelectItem>
+                <SelectItem value="shipping">Enviados</SelectItem>
+                <SelectItem value="completed">Completados</SelectItem>
                 <SelectItem value="cancelled">Cancelados</SelectItem>
               </SelectContent>
             </Select>
@@ -120,9 +138,15 @@ export default function OrdersPage() {
                     <TableCell>{formatDate(order.date)}</TableCell>
                     <TableCell>{formatCurrency(order.total)}</TableCell>
                     <TableCell>{order.items}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon">
+                      <OrderStatusMenu 
+                        status={order.status} 
+                        orderId={order.id}
+                        onStatusChange={handleStatusChange}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" onClick={() => handleViewOrder(order)}>
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">Ver detalles</span>
                       </Button>
@@ -140,6 +164,15 @@ export default function OrdersPage() {
           </Table>
         </div>
       </div>
+
+      {selectedOrder && (
+        <OrderDetailsModal
+          open={showOrderDetails}
+          onOpenChange={setShowOrderDetails}
+          order={selectedOrder}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </AdminLayout>
   );
 }
