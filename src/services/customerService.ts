@@ -43,11 +43,12 @@ export const fetchCustomers = async () => {
     
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
-    const authUsers = profile.auth_users;
     
-    // Utilizamos un operador de encadenamiento opcional para acceder a email de forma segura
-    if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
-      const emailValue = authUsers.email;
+    // Utilizamos una comprobación segura para acceder a email
+    if (profile.auth_users && 
+        typeof profile.auth_users === 'object' && 
+        'email' in profile.auth_users) {
+      const emailValue = profile.auth_users.email;
       email = emailValue ? String(emailValue) : 'Sin email';
     }
     
@@ -89,11 +90,12 @@ export const fetchCustomerDetails = async (id: string) => {
 
   // Extraer correo del usuario de manera segura
   let email = '';
-  const authUsers = profile.auth_users;
   
-  // Utilizamos un operador de encadenamiento opcional para acceder a email de forma segura
-  if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
-    const emailValue = authUsers.email;
+  // Utilizamos una comprobación segura para acceder a email
+  if (profile.auth_users && 
+      typeof profile.auth_users === 'object' && 
+      'email' in profile.auth_users) {
+    const emailValue = profile.auth_users.email;
     email = emailValue ? String(emailValue) : '';
   }
 
