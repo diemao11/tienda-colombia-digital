@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Star, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -15,6 +16,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const [imageError, setImageError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -22,10 +24,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
     addToCart(product, 1);
   };
 
-  // Default image if no product images
-  const imageUrl = product.images?.length > 0 
+  // Default image if no product images or if image fails to load
+  const imageUrl = (product.images?.length > 0 && !imageError) 
     ? product.images[0] 
     : "/placeholder.svg";
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   return (
     <Card className="overflow-hidden h-full flex flex-col transition-all hover:shadow-lg border border-gray-100 rounded-xl group">
@@ -35,6 +41,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             src={imageUrl}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover product-image transition-transform duration-500 group-hover:scale-105"
+            onError={handleImageError}
           />
           <div className="absolute top-2 right-2 flex flex-col gap-2">
             <motion.button 
