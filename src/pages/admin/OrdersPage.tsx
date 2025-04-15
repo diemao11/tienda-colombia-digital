@@ -2,13 +2,16 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Eye, CheckCircle } from "lucide-react";
+import { Search, Eye, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import OrderStatusMenu from "@/components/admin/OrderStatusMenu";
 import OrderDetailsModal from "@/components/admin/OrderDetailsModal";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchOrders, fetchOrderWithItems, updateOrderStatus } from "@/services/orderService";
+import { useToast } from "@/components/ui/use-toast";
 
 // Tipo para pedidos
 export type OrderStatus = "pending" | "processing" | "shipping" | "completed" | "cancelled";
@@ -22,22 +25,47 @@ export interface Order {
   items: number;
 }
 
-// Datos de ejemplo para pedidos
-const mockOrders: Order[] = [
-  { id: "ORD-001", customer: "Carlos Rodríguez", date: "2023-12-15", total: 750000, status: "completed", items: 3 },
-  { id: "ORD-002", customer: "Ana Martínez", date: "2023-12-20", total: 450000, status: "processing", items: 2 },
-  { id: "ORD-003", customer: "Juan Pérez", date: "2024-01-05", total: 1200000, status: "completed", items: 5 },
-  { id: "ORD-004", customer: "María López", date: "2024-01-10", total: 350000, status: "cancelled", items: 1 },
-  { id: "ORD-005", customer: "Luis Torres", date: "2024-01-15", total: 680000, status: "pending", items: 2 },
-  { id: "ORD-006", customer: "Sofia Ramírez", date: "2024-04-10", total: 920000, status: "shipping", items: 4 },
-];
-
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Consulta para obtener pedidos
+  const { data: orders = [], isLoading, error } = useQuery({
+    queryKey: ['orders'],
+    queryFn: fetchOrders
+  });
+
+  // Mutación para actualizar estado de pedido
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ orderId, newStatus }: { orderId: string, newStatus: OrderStatus }) => 
+      updateOrderStatus(orderId, newStatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast({
+        title: "Estado actualizado",
+        description: "El estado del pedido ha sido actualizado exitosamente."
+      });
+    },
+    onError: (error) => {
+      console.error("Error al actualizar estado:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado del pedido. Inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Consulta para obtener detalles de un pedido específico
+  const { data: orderDetails, isLoading: isLoadingDetails } = useQuery({
+    queryKey: ['order', selectedOrder?.id],
+    queryFn: () => selectedOrder ? fetchOrderWithItems(selectedOrder.id) : null,
+    enabled: !!selectedOrder && showOrderDetails
+  });
   
   // Función para filtrar pedidos
   const filteredOrders = orders.filter(order => 
@@ -69,13 +97,25 @@ export default function OrdersPage() {
   };
 
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    // Actualizar el estado del pedido
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+    updateStatusMutation.mutate({ orderId, newStatus });
   };
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center h-96">
+          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Error al cargar pedidos</h2>
+          <p className="text-muted-foreground mb-4">
+            No se pudieron cargar los pedidos. Intenta de nuevo más tarde.
+          </p>
+          <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}>
+            Reintentar
+          </Button>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -124,20 +164,27 @@ export default function OrdersPage() {
                 <TableHead>Cliente</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead>Total</TableHead>
-                <TableHead>Productos</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.length > 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-10">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                      <span className="text-muted-foreground">Cargando pedidos...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell className="font-medium">{order.id.substring(0, 8)}</TableCell>
                     <TableCell>{order.customer}</TableCell>
                     <TableCell>{formatDate(order.date)}</TableCell>
                     <TableCell>{formatCurrency(order.total)}</TableCell>
-                    <TableCell>{order.items}</TableCell>
                     <TableCell>
                       <OrderStatusMenu 
                         status={order.status} 
@@ -155,7 +202,7 @@ export default function OrdersPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
                     No se encontraron pedidos
                   </TableCell>
                 </TableRow>
@@ -169,8 +216,9 @@ export default function OrdersPage() {
         <OrderDetailsModal
           open={showOrderDetails}
           onOpenChange={setShowOrderDetails}
-          order={selectedOrder}
+          order={orderDetails || selectedOrder}
           onStatusChange={handleStatusChange}
+          isLoading={isLoadingDetails}
         />
       )}
     </AdminLayout>

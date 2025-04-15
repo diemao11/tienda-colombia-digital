@@ -2,8 +2,10 @@
 import { ReactNode } from "react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
 import { LayoutDashboard, Package, Users, ShoppingCart, Settings, LogOut, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -25,6 +27,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 }
 
 function AdminSidebar() {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente."
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar sesión. Intenta de nuevo.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center justify-between px-4 py-3">
@@ -94,7 +118,11 @@ function AdminSidebar() {
             </Link>
           </Button>
           
-          <Button variant="outline" className="w-full justify-start">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start"
+            onClick={handleLogout}
+          >
             <LogOut className="mr-2 h-4 w-4" />
             Cerrar sesión
           </Button>

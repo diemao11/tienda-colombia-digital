@@ -9,7 +9,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, CheckCircle, Clock, Package, Truck, XCircle } from "lucide-react";
 import { OrderStatus } from "@/pages/admin/OrdersPage";
-import { useToast } from "@/components/ui/use-toast";
 
 interface OrderStatusMenuProps {
   status: OrderStatus;
@@ -18,8 +17,6 @@ interface OrderStatusMenuProps {
 }
 
 export default function OrderStatusMenu({ status, orderId, onStatusChange }: OrderStatusMenuProps) {
-  const { toast } = useToast();
-
   const getStatusBadge = (status: OrderStatus) => {
     switch(status) {
       case "completed":
@@ -39,22 +36,6 @@ export default function OrderStatusMenu({ status, orderId, onStatusChange }: Ord
 
   const handleStatusChange = (newStatus: OrderStatus) => {
     onStatusChange(orderId, newStatus);
-    
-    toast({
-      title: "Estado actualizado",
-      description: `El pedido ${orderId} ahora está ${getStatusText(newStatus)}.`,
-    });
-  };
-
-  const getStatusText = (status: OrderStatus) => {
-    switch(status) {
-      case "completed": return "completado";
-      case "processing": return "en proceso";
-      case "shipping": return "enviado";
-      case "pending": return "pendiente";
-      case "cancelled": return "cancelado";
-      default: return status;
-    }
   };
 
   return (

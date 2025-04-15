@@ -2,25 +2,24 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-
-// Datos de ejemplo para clientes
-const mockCustomers = [
-  { id: 1, name: "Carlos Rodríguez", email: "carlos@ejemplo.com", orders: 5, spent: 1250000, lastOrder: "2023-10-15" },
-  { id: 2, name: "Ana Martínez", email: "ana@ejemplo.com", orders: 3, spent: 780000, lastOrder: "2023-11-02" },
-  { id: 3, name: "Juan Pérez", email: "juan@ejemplo.com", orders: 1, spent: 450000, lastOrder: "2023-11-20" },
-  { id: 4, name: "María López", email: "maria@ejemplo.com", orders: 8, spent: 2300000, lastOrder: "2023-12-05" },
-  { id: 5, name: "Luis Torres", email: "luis@ejemplo.com", orders: 2, spent: 680000, lastOrder: "2024-01-10" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { fetchCustomers } from "@/services/customerService";
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   
+  // Consulta para obtener clientes
+  const { data: customers = [], isLoading, error } = useQuery({
+    queryKey: ['customers'],
+    queryFn: fetchCustomers
+  });
+  
   // Función para filtrar clientes por nombre o email
-  const filteredCustomers = mockCustomers.filter(customer => 
+  const filteredCustomers = customers.filter(customer => 
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -35,12 +34,27 @@ export default function CustomersPage() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "Sin pedidos";
     return new Date(dateString).toLocaleDateString('es-CO', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
   };
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center h-96">
+          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Error al cargar clientes</h2>
+          <p className="text-muted-foreground mb-4">
+            No se pudieron cargar los clientes. Intenta de nuevo más tarde.
+          </p>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -76,10 +90,19 @@ export default function CustomersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCustomers.length > 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                      <span className="text-muted-foreground">Cargando clientes...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredCustomers.length > 0 ? (
                 filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.id}</TableCell>
+                    <TableCell className="font-medium">{customer.id.substring(0, 8)}</TableCell>
                     <TableCell>{customer.name}</TableCell>
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>
