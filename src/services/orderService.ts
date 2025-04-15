@@ -25,11 +25,11 @@ export const fetchOrders = async () => {
     let firstName = '';
     let lastName = '';
     
-    // Manejar perfiles de manera segura
-    const profiles = item.profiles || null;
+    // Manejar perfiles de manera segura con operador de encadenamiento opcional
+    const profiles = item.profiles;
     
-    if (profiles !== null && 
-        typeof profiles === 'object') {
+    if (profiles && typeof profiles === 'object') {
+      // Accedemos a las propiedades sólo si profiles no es null
       firstName = profiles.first_name || '';
       lastName = profiles.last_name || '';
     }
@@ -73,15 +73,15 @@ export const fetchOrderWithItems = async (id: string) => {
 
   if (itemsError) throw itemsError;
 
-  // Manejar perfiles de manera segura
+  // Manejar perfiles de manera segura con operador de encadenamiento opcional
   let firstName = '';
   let lastName = '';
   let phone = '';
   
-  const profiles = order.profiles || null;
+  const profiles = order.profiles;
   
-  if (profiles !== null && 
-      typeof profiles === 'object') {
+  if (profiles && typeof profiles === 'object') {
+    // Accedemos a las propiedades sólo si profiles no es null
     firstName = profiles.first_name || '';
     lastName = profiles.last_name || '';
     phone = profiles.phone || '';

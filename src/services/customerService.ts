@@ -43,12 +43,12 @@ export const fetchCustomers = async () => {
     
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
-    const authUsers = profile.auth_users || null;
+    const authUsers = profile.auth_users;
     
-    if (authUsers !== null && 
-        typeof authUsers === 'object' && 
-        'email' in authUsers) {
-      email = String(authUsers.email);
+    // Utilizamos un operador de encadenamiento opcional para acceder a email de forma segura
+    if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
+      const emailValue = authUsers.email;
+      email = emailValue ? String(emailValue) : 'Sin email';
     }
     
     // Construir el objeto de cliente
@@ -89,12 +89,12 @@ export const fetchCustomerDetails = async (id: string) => {
 
   // Extraer correo del usuario de manera segura
   let email = '';
-  const authUsers = profile.auth_users || null;
+  const authUsers = profile.auth_users;
   
-  if (authUsers !== null && 
-      typeof authUsers === 'object' && 
-      'email' in authUsers) {
-    email = String(authUsers.email);
+  // Utilizamos un operador de encadenamiento opcional para acceder a email de forma segura
+  if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
+    const emailValue = authUsers.email;
+    email = emailValue ? String(emailValue) : '';
   }
 
   return {
