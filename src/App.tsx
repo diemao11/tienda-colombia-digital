@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +31,7 @@ import ProductsPage from "./pages/admin/ProductsPage";
 import CustomersPage from "./pages/admin/CustomersPage";
 import OrdersPage from "./pages/admin/OrdersPage";
 
+// Create QueryClient instance outside the component to avoid recreation on renders
 const queryClient = new QueryClient();
 
 // Protected route component
@@ -47,48 +49,52 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-1">
-                <Routes>
-                  {/* Rutas de la tienda */}
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/tienda" element={<ShopPage />} />
-                  <Route path="/categoria/:category" element={<CategoryPage />} />
-                  <Route path="/categoria/:category/:subcategory" element={<CategoryPage />} />
-                  <Route path="/producto/:id" element={<ProductDetailPage />} />
-                  <Route path="/carrito" element={<CartPage />} />
-                  <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-                  <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
-                  <Route path="/nosotros" element={<AboutPage />} />
-                  <Route path="/contacto" element={<ContactPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  
-                  {/* Rutas del panel de administración */}
-                  <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                  <Route path="/admin/productos" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-                  <Route path="/admin/clientes" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
-                  <Route path="/admin/pedidos" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-                  
-                  {/* Ruta 404 */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CartProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-1">
+                    <Routes>
+                      {/* Rutas de la tienda */}
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/tienda" element={<ShopPage />} />
+                      <Route path="/categoria/:category" element={<CategoryPage />} />
+                      <Route path="/categoria/:category/:subcategory" element={<CategoryPage />} />
+                      <Route path="/producto/:id" element={<ProductDetailPage />} />
+                      <Route path="/carrito" element={<CartPage />} />
+                      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                      <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
+                      <Route path="/nosotros" element={<AboutPage />} />
+                      <Route path="/contacto" element={<ContactPage />} />
+                      <Route path="/auth" element={<AuthPage />} />
+                      
+                      {/* Rutas del panel de administración */}
+                      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                      <Route path="/admin/productos" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
+                      <Route path="/admin/clientes" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
+                      <Route path="/admin/pedidos" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+                      
+                      {/* Ruta 404 */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                </div>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
