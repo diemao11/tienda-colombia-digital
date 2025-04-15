@@ -11,7 +11,7 @@ export interface Customer {
 }
 
 export const fetchCustomers = async () => {
-  // Obtener los perfiles de usuario
+  // Obtener los perfiles de usuario con sus correos
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select(`
@@ -41,11 +41,16 @@ export const fetchCustomers = async () => {
     // Último pedido
     const lastOrder = orders.length > 0 ? orders[0].created_at : null;
     
+    // Extraer correo del usuario de manera segura
+    const email = profile.auth_users ? 
+      (typeof profile.auth_users === 'object' && profile.auth_users !== null && 'email' in profile.auth_users ? 
+        String(profile.auth_users.email) : 'Sin email') : 'Sin email';
+    
     // Construir el objeto de cliente
     customers.push({
       id: profile.id,
       name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || `Usuario ${profile.id.substring(0, 8)}`,
-      email: profile.auth_users?.email || 'Sin email',
+      email: email,
       orders: orders.length,
       spent: totalSpent,
       lastOrder: lastOrder || ''
@@ -77,11 +82,16 @@ export const fetchCustomerDetails = async (id: string) => {
   
   if (ordersError) throw ordersError;
 
+  // Extraer correo del usuario de manera segura
+  const email = profile.auth_users ? 
+    (typeof profile.auth_users === 'object' && profile.auth_users !== null && 'email' in profile.auth_users ? 
+      String(profile.auth_users.email) : '') : '';
+
   return {
     id: profile.id,
     firstName: profile.first_name || '',
     lastName: profile.last_name || '',
-    email: profile.auth_users?.email || '',
+    email: email,
     phone: profile.phone || '',
     address: profile.address || '',
     city: profile.city || '',

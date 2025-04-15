@@ -39,9 +39,10 @@ interface EditProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: Product;
+  onSuccess?: () => void;
 }
 
-export default function EditProductModal({ open, onOpenChange, product }: EditProductModalProps) {
+export default function EditProductModal({ open, onOpenChange, product, onSuccess }: EditProductModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,6 +74,11 @@ export default function EditProductModal({ open, onOpenChange, product }: EditPr
         title: "Producto actualizado",
         description: `El producto "${values.name}" ha sido actualizado exitosamente.`,
       });
+      
+      // Llamar callback de éxito si existe
+      if (onSuccess) {
+        onSuccess();
+      }
       
       // Cerrar modal
       onOpenChange(false);

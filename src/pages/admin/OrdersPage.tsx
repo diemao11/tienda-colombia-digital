@@ -16,13 +16,29 @@ import { useToast } from "@/components/ui/use-toast";
 // Tipo para pedidos
 export type OrderStatus = "pending" | "processing" | "shipping" | "completed" | "cancelled";
 
+export interface OrderItem {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+}
+
 export interface Order {
   id: string;
   customer: string;
   date: string;
   total: number;
   status: OrderStatus;
-  items: number;
+  items: number | OrderItem[];
+  customerDetails?: {
+    name: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+  };
 }
 
 export default function OrdersPage() {

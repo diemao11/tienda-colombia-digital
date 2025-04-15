@@ -22,8 +22,15 @@ export const fetchOrders = async () => {
 
   // Transformar los datos para que coincidan con la estructura de Order
   return data.map(item => {
-    const firstName = item.profiles?.first_name || '';
-    const lastName = item.profiles?.last_name || '';
+    let firstName = '';
+    let lastName = '';
+    
+    // Manejar perfiles de manera segura
+    if (item.profiles && typeof item.profiles === 'object' && item.profiles !== null) {
+      firstName = item.profiles.first_name || '';
+      lastName = item.profiles.last_name || '';
+    }
+    
     const customerName = firstName && lastName 
       ? `${firstName} ${lastName}` 
       : `Usuario ${item.user_id.substring(0, 8)}`;
@@ -63,8 +70,18 @@ export const fetchOrderWithItems = async (id: string) => {
 
   if (itemsError) throw itemsError;
 
-  const firstName = order.profiles?.first_name || '';
-  const lastName = order.profiles?.last_name || '';
+  // Manejar perfiles de manera segura
+  let firstName = '';
+  let lastName = '';
+  let phone = '';
+  
+  // Manejar perfiles de manera segura
+  if (order.profiles && typeof order.profiles === 'object' && order.profiles !== null) {
+    firstName = order.profiles.first_name || '';
+    lastName = order.profiles.last_name || '';
+    phone = order.profiles.phone || '';
+  }
+  
   const customerName = firstName && lastName 
     ? `${firstName} ${lastName}` 
     : `Usuario ${order.user_id.substring(0, 8)}`;
@@ -74,7 +91,7 @@ export const fetchOrderWithItems = async (id: string) => {
     customer: customerName,
     customerDetails: {
       name: customerName,
-      phone: order.profiles?.phone || '',
+      phone: phone,
       address: order.shipping_address,
       city: order.shipping_city,
       state: order.shipping_state,

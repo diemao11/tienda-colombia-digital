@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,9 +36,10 @@ const productSchema = z.object({
 interface AddProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export default function AddProductModal({ open, onOpenChange }: AddProductModalProps) {
+export default function AddProductModal({ open, onOpenChange, onSuccess }: AddProductModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,10 +49,10 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
     defaultValues: {
       name: "",
       description: "",
-      price: undefined,
-      category: undefined,
+      price: 0,
+      category: "furniture",
       subcategory: "",
-      stock: undefined,
+      stock: 0,
       brand: "",
     },
   });
@@ -63,16 +63,21 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
     
     // Simulando una petición a la API
     setTimeout(() => {
-      // Aquí iría la lógica para añadir el producto a la base de datos
-      console.log("Producto a añadir:", values);
+      // Aquí iría la lógica para crear el producto en la base de datos
+      console.log("Producto a crear:", values);
       
       // Mostrar notificación de éxito
       toast({
-        title: "Producto añadido",
-        description: `El producto "${values.name}" ha sido añadido exitosamente.`,
+        title: "Producto creado",
+        description: `El producto "${values.name}" ha sido creado exitosamente.`,
       });
       
-      // Resetear formulario y cerrar modal
+      // Llamar callback de éxito si existe
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Cerrar modal y resetear formulario
       form.reset();
       onOpenChange(false);
       setIsSubmitting(false);
@@ -85,7 +90,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
         <DialogHeader>
           <DialogTitle>Añadir nuevo producto</DialogTitle>
           <DialogDescription>
-            Completa el formulario para añadir un nuevo producto a tu catálogo.
+            Completa el formulario para añadir un nuevo producto al catálogo.
           </DialogDescription>
         </DialogHeader>
         
@@ -99,7 +104,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormItem>
                     <FormLabel>Nombre del producto</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Silla Ergonómica de Oficina" {...field} />
+                      <Input placeholder="Ej: Silla Ergonómica" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -113,7 +118,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormItem>
                     <FormLabel>Precio (COP)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Ej: 450000" {...field} />
+                      <Input type="number" placeholder="Ej: 150000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,7 +134,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Describe detalladamente el producto" 
+                      placeholder="Describe el producto en detalle..." 
                       className="min-h-[100px]" 
                       {...field} 
                     />
@@ -173,7 +178,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormItem>
                     <FormLabel>Subcategoría</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: sillas, sofás, escritorios" {...field} />
+                      <Input placeholder="Ej: Sillas de oficina" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -189,7 +194,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormItem>
                     <FormLabel>Stock disponible</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Ej: 15" {...field} />
+                      <Input type="number" placeholder="Ej: 10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -203,7 +208,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                   <FormItem>
                     <FormLabel>Marca (opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: ErgoColombia" {...field} />
+                      <Input placeholder="Ej: Ergonomics" {...field} />
                     </FormControl>
                     <FormDescription>
                       Deja en blanco si no aplica
@@ -219,7 +224,7 @@ export default function AddProductModal({ open, onOpenChange }: AddProductModalP
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Guardando..." : "Guardar producto"}
+                {isSubmitting ? "Creando..." : "Crear producto"}
               </Button>
             </DialogFooter>
           </form>
