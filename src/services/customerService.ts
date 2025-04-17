@@ -44,10 +44,9 @@ export const fetchCustomers = async () => {
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
     
-    // Utilizamos verificación más segura
     if (profile.auth_users) {
       const authUsers = profile.auth_users;
-      if (typeof authUsers === 'object' && 'email' in authUsers) {
+      if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
         const emailValue = authUsers.email;
         email = emailValue ? String(emailValue) : 'Sin email';
       }
@@ -92,10 +91,9 @@ export const fetchCustomerDetails = async (id: string) => {
   // Extraer correo del usuario de manera segura
   let email = '';
   
-  // Verificación más segura para auth_users
   if (profile.auth_users) {
     const authUsers = profile.auth_users;
-    if (typeof authUsers === 'object' && 'email' in authUsers) {
+    if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
       const emailValue = authUsers.email;
       email = emailValue ? String(emailValue) : '';
     }

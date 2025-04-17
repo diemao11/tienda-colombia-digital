@@ -25,10 +25,9 @@ export const fetchOrders = async () => {
     let firstName = '';
     let lastName = '';
     
-    // Verificación más segura
     if (item.profiles) {
       const profiles = item.profiles;
-      if (typeof profiles === 'object') {
+      if (profiles && typeof profiles === 'object') {
         firstName = profiles.first_name || '';
         lastName = profiles.last_name || '';
       }
@@ -80,7 +79,7 @@ export const fetchOrderWithItems = async (id: string) => {
   
   if (order.profiles) {
     const profiles = order.profiles;
-    if (typeof profiles === 'object') {
+    if (profiles && typeof profiles === 'object') {
       firstName = profiles.first_name || '';
       lastName = profiles.last_name || '';
       phone = profiles.phone || '';
