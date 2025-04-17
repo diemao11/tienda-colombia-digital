@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Mail, Phone, CreditCard, Shield, Truck } from "lucide-react";
 
@@ -8,9 +7,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">TiendaColombia</h3>
+            <h3 className="font-bold text-lg mb-4">Electro-Estelar</h3>
             <p className="text-gray-600 mb-4">
-              Tu tienda online para muebles, electrónica y tecnología de alta calidad en Colombia.
+              Tu tienda online de muebles, electrónica y tecnología de alta calidad en Colombia.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-600 hover:text-brand-600">
@@ -94,7 +93,7 @@ const Footer = () => {
         
         <div className="border-t border-gray-200 mt-8 pt-6 text-center">
           <p className="text-gray-600 text-sm">
-            © {new Date().getFullYear()} TiendaColombia. Todos los derechos reservados.
+            © {new Date().getFullYear()} Electro-Estelar. Todos los derechos reservados.
           </p>
         </div>
       </div>

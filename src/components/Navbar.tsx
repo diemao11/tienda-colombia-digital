@@ -32,7 +32,7 @@ const Navbar = () => {
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
         <div className="flex gap-6 md:gap-10">
           <Link to="/" className="hidden items-center space-x-2 md:flex">
-            <span className="text-xl font-bold tracking-tight">TiendaColombia</span>
+            <span className="text-xl font-bold tracking-tight">Electro-Estelar</span>
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
@@ -175,3 +175,4 @@ const navigationMenuTriggerStyle = () => {
 };
 
 export default Navbar;
+
