@@ -27,11 +27,13 @@ export const fetchOrders = async () => {
     
     // Verificación más segura usando una variable temporal
     const profiles = item.profiles;
-    if (profiles !== null && 
-        typeof profiles === 'object') {
+    // Dividimos la verificación en dos pasos para mayor seguridad
+    if (profiles !== null) {
       // Solo accedemos a las propiedades si profiles es un objeto válido
-      firstName = profiles.first_name || '';
-      lastName = profiles.last_name || '';
+      if (typeof profiles === 'object') {
+        firstName = profiles.first_name || '';
+        lastName = profiles.last_name || '';
+      }
     }
     
     const customerName = firstName && lastName 
@@ -79,12 +81,14 @@ export const fetchOrderWithItems = async (id: string) => {
   let phone = '';
   
   const profiles = order.profiles;
-  if (profiles !== null && 
-      typeof profiles === 'object') {
+  // Dividimos la verificación en dos pasos para mayor seguridad
+  if (profiles !== null) {
     // Solo accedemos a las propiedades si profiles es un objeto válido
-    firstName = profiles.first_name || '';
-    lastName = profiles.last_name || '';
-    phone = profiles.phone || '';
+    if (typeof profiles === 'object') {
+      firstName = profiles.first_name || '';
+      lastName = profiles.last_name || '';
+      phone = profiles.phone || '';
+    }
   }
   
   const customerName = firstName && lastName 

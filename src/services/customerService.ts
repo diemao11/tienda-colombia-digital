@@ -46,11 +46,13 @@ export const fetchCustomers = async () => {
     
     // Utilizamos una verificación más segura: primero comprobamos si auth_users existe
     const authUsers = profile.auth_users;
-    if (authUsers !== null && 
-        typeof authUsers === 'object' && 
-        'email' in authUsers) {
-      const emailValue = authUsers.email;
-      email = emailValue ? String(emailValue) : 'Sin email';
+    // Solo accedemos a las propiedades después de verificar que no es nulo
+    if (authUsers !== null) {
+      // Verificamos que sea un objeto y tenga la propiedad email
+      if (typeof authUsers === 'object' && 'email' in authUsers) {
+        const emailValue = authUsers.email;
+        email = emailValue ? String(emailValue) : 'Sin email';
+      }
     }
     
     // Construir el objeto de cliente
@@ -94,11 +96,13 @@ export const fetchCustomerDetails = async (id: string) => {
   
   // Verificación más segura para auth_users
   const authUsers = profile.auth_users;
-  if (authUsers !== null && 
-      typeof authUsers === 'object' && 
-      'email' in authUsers) {
-    const emailValue = authUsers.email;
-    email = emailValue ? String(emailValue) : '';
+  // Separamos las comprobaciones para mayor seguridad con TypeScript
+  if (authUsers !== null) {
+    // Verificamos que sea un objeto y tenga la propiedad email
+    if (typeof authUsers === 'object' && 'email' in authUsers) {
+      const emailValue = authUsers.email;
+      email = emailValue ? String(emailValue) : '';
+    }
   }
 
   return {
