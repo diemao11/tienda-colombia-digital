@@ -44,11 +44,9 @@ export const fetchCustomers = async () => {
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
     
-    // Utilizamos una verificación más segura: primero comprobamos si auth_users existe
-    const authUsers = profile.auth_users;
-    // Solo accedemos a las propiedades después de verificar que no es nulo
-    if (authUsers !== null) {
-      // Verificamos que sea un objeto y tenga la propiedad email
+    // Utilizamos verificación más segura
+    if (profile.auth_users) {
+      const authUsers = profile.auth_users;
       if (typeof authUsers === 'object' && 'email' in authUsers) {
         const emailValue = authUsers.email;
         email = emailValue ? String(emailValue) : 'Sin email';
@@ -95,10 +93,8 @@ export const fetchCustomerDetails = async (id: string) => {
   let email = '';
   
   // Verificación más segura para auth_users
-  const authUsers = profile.auth_users;
-  // Separamos las comprobaciones para mayor seguridad con TypeScript
-  if (authUsers !== null) {
-    // Verificamos que sea un objeto y tenga la propiedad email
+  if (profile.auth_users) {
+    const authUsers = profile.auth_users;
     if (typeof authUsers === 'object' && 'email' in authUsers) {
       const emailValue = authUsers.email;
       email = emailValue ? String(emailValue) : '';

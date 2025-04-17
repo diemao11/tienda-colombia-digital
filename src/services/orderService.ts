@@ -25,11 +25,9 @@ export const fetchOrders = async () => {
     let firstName = '';
     let lastName = '';
     
-    // Verificación más segura usando una variable temporal
-    const profiles = item.profiles;
-    // Dividimos la verificación en dos pasos para mayor seguridad
-    if (profiles !== null) {
-      // Solo accedemos a las propiedades si profiles es un objeto válido
+    // Verificación más segura
+    if (item.profiles) {
+      const profiles = item.profiles;
       if (typeof profiles === 'object') {
         firstName = profiles.first_name || '';
         lastName = profiles.last_name || '';
@@ -75,15 +73,13 @@ export const fetchOrderWithItems = async (id: string) => {
 
   if (itemsError) throw itemsError;
 
-  // Verificación más segura usando una variable temporal
+  // Verificación más segura
   let firstName = '';
   let lastName = '';
   let phone = '';
   
-  const profiles = order.profiles;
-  // Dividimos la verificación en dos pasos para mayor seguridad
-  if (profiles !== null) {
-    // Solo accedemos a las propiedades si profiles es un objeto válido
+  if (order.profiles) {
+    const profiles = order.profiles;
     if (typeof profiles === 'object') {
       firstName = profiles.first_name || '';
       lastName = profiles.last_name || '';
