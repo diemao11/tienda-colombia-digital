@@ -66,10 +66,10 @@ const ContactPage = () => {
               <h3 className="font-semibold text-lg mb-2">Llámanos</h3>
               <p className="text-gray-600 mb-2">Atención al cliente de lunes a viernes</p>
               <a
-                href="tel:+573001234567"
+                href="tel:+573107722311"
                 className="text-brand-600 font-medium hover:underline"
               >
-                +57 300 123 4567
+                +57 310 772 2311
               </a>
             </div>
           </CardContent>
@@ -84,10 +84,10 @@ const ContactPage = () => {
               <h3 className="font-semibold text-lg mb-2">Envíanos un email</h3>
               <p className="text-gray-600 mb-2">Te responderemos lo antes posible</p>
               <a
-                href="mailto:info@tiendacolombia.com"
+                href="mailto:info@electroestelar.com"
                 className="text-brand-600 font-medium hover:underline"
               >
-                info@tiendacolombia.com
+                info@electroestelar.com
               </a>
             </div>
           </CardContent>
@@ -100,9 +100,9 @@ const ContactPage = () => {
                 <MapPin className="text-brand-600 h-6 w-6" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Visítanos</h3>
-              <p className="text-gray-600 mb-2">Nuestra oficina principal</p>
+              <p className="text-gray-600 mb-2">Nuestra bodega principal</p>
               <address className="not-italic text-brand-600 font-medium">
-                Calle 85 #11-53, Bogotá, Colombia
+                Calle 23d # 71d-67, Bogotá, Colombia
               </address>
             </div>
           </CardContent>
