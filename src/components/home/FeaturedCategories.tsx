@@ -8,19 +8,19 @@ const categories = [
   {
     name: "Muebles",
     description: "Diseños que transforman tu espacio",
-    image: "/categories/furniture.jpg",
+    image: "/lovable-uploads/0215b4a6-7d45-48f4-bbde-fce166395909.png",
     link: "/categoria/furniture"
   },
   {
     name: "Electrónica",
     description: "Vive la innovación en sonido e imagen",
-    image: "/categories/electronics.jpg",
+    image: "/lovable-uploads/826bd909-8423-4f32-b7b7-77e03afca3d1.png",
     link: "/categoria/electronics"
   },
   {
     name: "Tecnología",
     description: "Rendimiento superior para tus ideas",
-    image: "/categories/technology.jpg",
+    image: "/lovable-uploads/7246abdb-61eb-48a6-93e1-5609efa5d283.png",
     link: "/categoria/technology"
   }
 ];
