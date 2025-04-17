@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, CreditCard, Shield, Truck } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-100 mt-16">
+  return <footer className="bg-gray-100 mt-16">
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -55,7 +53,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-2 text-brand-600" />
-                <span className="text-gray-600">+57 300 123 4567</span>
+                <span className="text-gray-600">+57 310-7722311</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-2 text-brand-600" />
@@ -97,8 +95,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
