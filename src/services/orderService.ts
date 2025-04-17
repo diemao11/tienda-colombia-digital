@@ -26,10 +26,13 @@ export const fetchOrders = async () => {
     let lastName = '';
     
     if (item.profiles) {
-      const profiles = item.profiles;
-      if (profiles && typeof profiles === 'object') {
-        firstName = profiles.first_name || '';
-        lastName = profiles.last_name || '';
+      // Make a local copy for type checking
+      const profilesData = item.profiles;
+      // Ensure profilesData is not null before accessing
+      if (profilesData && typeof profilesData === 'object') {
+        // TypeScript now knows profiles has these properties
+        firstName = (profilesData as { first_name?: string }).first_name || '';
+        lastName = (profilesData as { last_name?: string }).last_name || '';
       }
     }
     
@@ -78,11 +81,14 @@ export const fetchOrderWithItems = async (id: string) => {
   let phone = '';
   
   if (order.profiles) {
-    const profiles = order.profiles;
-    if (profiles && typeof profiles === 'object') {
-      firstName = profiles.first_name || '';
-      lastName = profiles.last_name || '';
-      phone = profiles.phone || '';
+    // Make a local copy for type checking
+    const profilesData = order.profiles;
+    // Ensure profilesData is not null before accessing
+    if (profilesData && typeof profilesData === 'object') {
+      // TypeScript now knows profiles has these properties
+      firstName = (profilesData as { first_name?: string }).first_name || '';
+      lastName = (profilesData as { last_name?: string }).last_name || '';
+      phone = (profilesData as { phone?: string }).phone || '';
     }
   }
   
