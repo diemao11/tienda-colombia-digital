@@ -142,10 +142,17 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
 
   // Función para manejar el envío del formulario
   async function onSubmit(values: z.infer<typeof productSchema>) {
+    // Fix: Ensure all required properties are present and properly typed
     const productData: ProductFormData = {
-      ...values,
+      name: values.name,
+      description: values.description,
+      price: values.price,
+      category: values.category,
+      subcategory: values.subcategory,
+      stock: values.stock,
       images: uploadedImages,
-      features: [], // Adding the required features property with an empty array as default
+      features: [], // Adding empty array for features
+      brand: values.brand || undefined,
     };
     createProductMutation.mutate(productData);
   }
