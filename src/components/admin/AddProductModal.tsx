@@ -145,6 +145,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
     const productData: ProductFormData = {
       ...values,
       images: uploadedImages,
+      features: [], // Adding the required features property with an empty array as default
     };
     createProductMutation.mutate(productData);
   }
