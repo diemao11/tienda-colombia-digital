@@ -50,7 +50,7 @@ export const fetchCustomers = async () => {
       // Ensure authUsers is not null before trying to access properties
       if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
         // Now TypeScript knows authUsers has an email property
-        const emailValue = authUsers ? (authUsers as { email: string | null }).email : null;
+        const emailValue = (authUsers as { email: string | null }).email;
         email = emailValue ? String(emailValue) : 'Sin email';
       }
     }
@@ -100,7 +100,7 @@ export const fetchCustomerDetails = async (id: string) => {
     // Explicit type checking
     if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
       // TypeScript now knows authUsers has an email property
-      const emailValue = authUsers ? (authUsers as { email: string | null }).email : null;
+      const emailValue = (authUsers as { email: string | null }).email;
       email = emailValue ? String(emailValue) : '';
     }
   }
