@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { ProductFormData, createProduct } from "@/services/productService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Upload, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Esquema de validación para el formulario
 const productSchema = z.object({
@@ -21,8 +26,8 @@ const productSchema = z.object({
   price: z.coerce.number().positive({
     message: "El precio debe ser un número positivo.",
   }),
-  category: z.enum(["furniture", "electronics", "technology"], {
-    errorMap: () => ({ message: "Por favor selecciona una categoría válida." }),
+  category: z.string().min(1, {
+    message: "La categoría es requerida.",
   }),
   subcategory: z.string().min(1, {
     message: "La subcategoría es requerida.",
@@ -31,6 +36,7 @@ const productSchema = z.object({
     message: "El stock debe ser un número entero no negativo.",
   }),
   brand: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 interface AddProductModalProps {
@@ -41,7 +47,9 @@ interface AddProductModalProps {
 
 export default function AddProductModal({ open, onOpenChange, onSuccess }: AddProductModalProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Inicializar formulario con React Hook Form y Zod
   const form = useForm<z.infer<typeof productSchema>>({
@@ -50,43 +58,100 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
       name: "",
       description: "",
       price: 0,
-      category: "furniture",
+      category: "",
       subcategory: "",
       stock: 0,
       brand: "",
+      images: [],
     },
   });
 
-  // Función para manejar el envío del formulario
-  function onSubmit(values: z.infer<typeof productSchema>) {
-    setIsSubmitting(true);
-    
-    // Simulando una petición a la API
-    setTimeout(() => {
-      // Aquí iría la lógica para crear el producto en la base de datos
-      console.log("Producto a crear:", values);
-      
-      // Mostrar notificación de éxito
+  const createProductMutation = useMutation({
+    mutationFn: (data: ProductFormData) => createProduct(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({
         title: "Producto creado",
-        description: `El producto "${values.name}" ha sido creado exitosamente.`,
+        description: "El producto ha sido creado exitosamente.",
       });
-      
-      // Llamar callback de éxito si existe
-      if (onSuccess) {
-        onSuccess();
-      }
-      
-      // Cerrar modal y resetear formulario
+      onSuccess?.();
       form.reset();
+      setUploadedImages([]);
       onOpenChange(false);
-      setIsSubmitting(false);
-    }, 1000);
+    },
+    onError: (error) => {
+      console.error('Error creating product:', error);
+      toast({
+        title: "Error",
+        description: "Hubo un error al crear el producto. Por favor, intenta de nuevo.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const newImages: string[] = [];
+
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError, data } = await supabase.storage
+          .from('products')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('products')
+          .getPublicUrl(filePath);
+
+        newImages.push(publicUrl);
+      }
+
+      setUploadedImages([...uploadedImages, ...newImages]);
+      form.setValue('images', [...uploadedImages, ...newImages]);
+      toast({
+        title: "Imágenes subidas",
+        description: "Las imágenes se han subido correctamente.",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: "Error al subir las imágenes. Por favor, intenta de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...uploadedImages];
+    newImages.splice(index, 1);
+    setUploadedImages(newImages);
+    form.setValue('images', newImages);
+  };
+
+  // Función para manejar el envío del formulario
+  async function onSubmit(values: z.infer<typeof productSchema>) {
+    const productData: ProductFormData = {
+      ...values,
+      images: uploadedImages,
+    };
+    createProductMutation.mutate(productData);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Añadir nuevo producto</DialogTitle>
           <DialogDescription>
@@ -143,6 +208,51 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
                 </FormItem>
               )}
             />
+
+            {/* Image upload section */}
+            <div className="space-y-4">
+              <FormLabel>Imágenes del producto</FormLabel>
+              <div className="flex flex-wrap gap-4">
+                {uploadedImages.map((url, index) => (
+                  <div key={url} className="relative">
+                    <img
+                      src={url}
+                      alt={`Product ${index + 1}`}
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-4">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                  disabled={isUploading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={isUploading}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {isUploading ? "Subiendo..." : "Subir imágenes"}
+                </Button>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -220,11 +330,22 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
             </div>
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  onOpenChange(false);
+                  form.reset();
+                  setUploadedImages([]);
+                }}
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creando..." : "Crear producto"}
+              <Button 
+                type="submit" 
+                disabled={createProductMutation.isPending || isUploading}
+              >
+                {createProductMutation.isPending ? "Creando..." : "Crear producto"}
               </Button>
             </DialogFooter>
           </form>
