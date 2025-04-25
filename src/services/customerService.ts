@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Customer {
@@ -44,15 +43,10 @@ export const fetchCustomers = async () => {
     // Extraer correo del usuario de manera segura
     let email = 'Sin email';
     
-    if (profile.auth_users) {
-      // Make a local copy that we can type-check
-      const authUsers = profile.auth_users;
-      // Ensure authUsers is not null before trying to access properties
-      if (typeof authUsers === 'object' && authUsers !== null && 'email' in authUsers) {
-        // Now TypeScript knows authUsers has an email property
-        const emailValue = (authUsers as { email: string | null }).email;
-        email = emailValue ? String(emailValue) : 'Sin email';
-      }
+    // Improve type checking for auth_users
+    if (profile.auth_users && typeof profile.auth_users === 'object') {
+      const authUsers = profile.auth_users as { email?: string | null };
+      email = authUsers.email ? String(authUsers.email) : 'Sin email';
     }
     
     // Construir el objeto de cliente
@@ -94,15 +88,10 @@ export const fetchCustomerDetails = async (id: string) => {
   // Extraer correo del usuario de manera segura
   let email = '';
   
-  if (profile.auth_users) {
-    // Make a local copy
-    const authUsers = profile.auth_users;
-    // Explicit type checking
-    if (typeof authUsers === 'object' && authUsers !== null && 'email' in authUsers) {
-      // TypeScript now knows authUsers has an email property
-      const emailValue = (authUsers as { email: string | null }).email;
-      email = emailValue ? String(emailValue) : '';
-    }
+  // Improve type checking for auth_users
+  if (profile.auth_users && typeof profile.auth_users === 'object') {
+    const authUsers = profile.auth_users as { email?: string | null };
+    email = authUsers.email ? String(authUsers.email) : '';
   }
 
   return {
