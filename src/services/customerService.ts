@@ -48,7 +48,7 @@ export const fetchCustomers = async () => {
       // Make a local copy that we can type-check
       const authUsers = profile.auth_users;
       // Ensure authUsers is not null before trying to access properties
-      if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
+      if (typeof authUsers === 'object' && authUsers !== null && 'email' in authUsers) {
         // Now TypeScript knows authUsers has an email property
         const emailValue = (authUsers as { email: string | null }).email;
         email = emailValue ? String(emailValue) : 'Sin email';
@@ -98,7 +98,7 @@ export const fetchCustomerDetails = async (id: string) => {
     // Make a local copy
     const authUsers = profile.auth_users;
     // Explicit type checking
-    if (authUsers && typeof authUsers === 'object' && 'email' in authUsers) {
+    if (typeof authUsers === 'object' && authUsers !== null && 'email' in authUsers) {
       // TypeScript now knows authUsers has an email property
       const emailValue = (authUsers as { email: string | null }).email;
       email = emailValue ? String(emailValue) : '';
