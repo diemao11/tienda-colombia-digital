@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,13 +23,11 @@ export default function ProductsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Consulta para obtener productos
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts
   });
 
-  // Mutación para eliminar producto
   const deleteProductMutation = useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
@@ -51,18 +48,12 @@ export default function ProductsPage() {
     }
   });
 
-  // Función para filtrar productos por nombre
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getCategoryLabel = (category: string) => {
-    switch(category) {
-      case 'furniture': return 'Muebles';
-      case 'electronics': return 'Electrónica';
-      case 'technology': return 'Tecnología';
-      default: return category;
-    }
+    return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
   const handleEditClick = (product: Product) => {

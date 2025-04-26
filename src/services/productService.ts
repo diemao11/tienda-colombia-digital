@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 
@@ -19,9 +18,9 @@ export const fetchProducts = async () => {
     .from('products')
     .select(`
       *,
-      category:category_id(name),
-      subcategory:subcategory_id(name),
-      brand:brand_id(name),
+      category:categories(id, name),
+      subcategory:subcategories(id, name),
+      brand:brands(name),
       product_images(url, position)
     `)
     .order('created_at', { ascending: false });
@@ -31,19 +30,31 @@ export const fetchProducts = async () => {
     throw error;
   }
 
+  console.log("Products fetched from DB:", data);
+
   // Transformar los datos para que coincidan con la estructura de Product
-  return data.map(item => ({
-    id: item.id,
-    name: item.name,
-    description: item.description || "",
-    price: item.price,
-    category: item.category?.name || "Sin categoría",
-    subcategory: item.subcategory?.name || "",
-    images: item.product_images?.map(img => img.url) || [],
-    stock: item.stock,
-    features: item.features || [],
-    brand: item.brand?.name
-  })) as Product[];
+  return data.map(item => {
+    const categoryName = item.category?.name || "Sin categoría";
+    
+    // Mapeo de nombres de categorías en inglés a español para la visualización
+    let displayCategory = categoryName;
+    if (categoryName === "technology") displayCategory = "tecnología";
+    if (categoryName === "electronics") displayCategory = "electrónica";
+    if (categoryName === "furniture") displayCategory = "muebles";
+    
+    return {
+      id: item.id,
+      name: item.name,
+      description: item.description || "",
+      price: item.price,
+      category: displayCategory,
+      subcategory: item.subcategory?.name || "",
+      images: item.product_images?.map(img => img.url) || [],
+      stock: item.stock,
+      features: item.features || [],
+      brand: item.brand?.name
+    };
+  }) as Product[];
 };
 
 export const fetchProduct = async (id: string) => {
@@ -51,9 +62,9 @@ export const fetchProduct = async (id: string) => {
     .from('products')
     .select(`
       *,
-      category:category_id(id, name),
-      subcategory:subcategory_id(id, name),
-      brand:brand_id(id, name),
+      category:categories(id, name),
+      subcategory:subcategories(id, name),
+      brand:brands(id, name),
       product_images(id, url, position)
     `)
     .eq('id', id)
