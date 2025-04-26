@@ -18,4 +18,3 @@ export const mapProductFromDB = (item: any): Product => {
     brand: item.brand?.name
   };
 };
-
