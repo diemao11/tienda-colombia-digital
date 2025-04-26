@@ -1,12 +1,12 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
-import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -38,15 +38,17 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   const { user, isLoading, refreshUserRole } = useAuth();
   const location = useLocation();
   
-  console.log("ProtectedRoute checking access. User:", user?.email, "Role:", user?.role, "Admin only:", adminOnly);
-  
-  React.useEffect(() => {
-    // Actualizar automáticamente el rol del usuario cuando se intenta acceder a una ruta protegida
-    if (user && adminOnly) {
-      console.log("Refreshing user role for admin route access");
-      refreshUserRole();
-    }
-  }, [user, adminOnly, refreshUserRole]);
+  // Refreshar el rol del usuario siempre que se renderice un componente protegido
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (user) {
+        console.log("Refreshing user role for protected route. Current role:", user?.role);
+        await refreshUserRole();
+      }
+    };
+    
+    checkUserRole();
+  }, [user, refreshUserRole]);
   
   if (isLoading) {
     console.log("Auth is still loading...");
@@ -58,9 +60,13 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
   
-  if (adminOnly && user.role !== 'admin') {
-    console.log("User is not admin, redirecting to home. User role:", user.role);
-    return <Navigate to="/" replace />;
+  // Verificación explícita de rol de administrador
+  if (adminOnly) {
+    console.log("Admin route check - User role:", user.role, "Is admin?", user.role === 'admin');
+    if (user.role !== 'admin') {
+      console.log("User is not admin, redirecting to home");
+      return <Navigate to="/" replace />;
+    }
   }
   
   console.log("Access granted to", adminOnly ? "admin route" : "protected route");

@@ -47,11 +47,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshUserRole = async () => {
     if (!user?.id) return;
     
+    console.log("Refreshing user role for ID:", user.id);
     setIsLoading(true);
     try {
       const role = await fetchUserRole(user.id);
       console.log('Refreshed user role:', role);
-      setUser({ ...user, role });
+      
+      // Actualizamos el usuario con el nuevo rol
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        return { ...prevUser, role };
+      });
     } catch (error) {
       console.error('Error refreshing user role:', error);
     } finally {
@@ -76,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setTimeout(async () => {
             try {
               const role = await fetchUserRole(session.user.id);
-              console.log('User role:', role);
+              console.log('User role from auth change:', role);
               setUser({ ...session.user, role });
               setIsLoading(false);
             } catch (error) {
