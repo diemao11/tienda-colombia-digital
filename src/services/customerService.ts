@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Customer {
@@ -10,7 +11,7 @@ export interface Customer {
 }
 
 export const fetchCustomers = async () => {
-  // Obtener los perfiles de usuario con sus correos
+  // Get user profiles with their emails
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select(`
@@ -22,11 +23,11 @@ export const fetchCustomers = async () => {
 
   if (profilesError) throw profilesError;
 
-  // Para cada perfil, obtener sus pedidos y calcular estadísticas
+  // For each profile, get their orders and calculate statistics
   const customers: Customer[] = [];
   
   for (const profile of profiles) {
-    // Obtener los pedidos del usuario
+    // Get user's orders
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('id, total, created_at')
@@ -35,12 +36,12 @@ export const fetchCustomers = async () => {
     
     if (ordersError) throw ordersError;
     
-    // Calcular total gastado
+    // Calculate total spent
     const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
-    // Último pedido
+    // Get last order date
     const lastOrder = orders.length > 0 ? orders[0].created_at : null;
     
-    // Extraer correo del usuario de manera segura
+    // Safely extract email from auth_users
     let email = 'Sin email';
     
     // Improve type checking for auth_users
@@ -49,7 +50,7 @@ export const fetchCustomers = async () => {
       email = authUsers.email ? String(authUsers.email) : 'Sin email';
     }
     
-    // Construir el objeto de cliente
+    // Build customer object
     customers.push({
       id: profile.id,
       name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || `Usuario ${profile.id.substring(0, 8)}`,
@@ -63,49 +64,3 @@ export const fetchCustomers = async () => {
   return customers;
 };
 
-export const fetchCustomerDetails = async (id: string) => {
-  // Obtener el perfil del usuario
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select(`
-      *,
-      auth_users:id(email)
-    `)
-    .eq('id', id)
-    .single();
-
-  if (profileError) throw profileError;
-
-  // Obtener los pedidos del usuario
-  const { data: orders, error: ordersError } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('user_id', id)
-    .order('created_at', { ascending: false });
-  
-  if (ordersError) throw ordersError;
-
-  // Extraer correo del usuario de manera segura
-  let email = '';
-  
-  // Improve type checking for auth_users
-  if (profile.auth_users && typeof profile.auth_users === 'object') {
-    const authUsers = profile.auth_users as { email?: string | null };
-    email = authUsers.email ? String(authUsers.email) : '';
-  }
-
-  return {
-    id: profile.id,
-    firstName: profile.first_name || '',
-    lastName: profile.last_name || '',
-    email: email,
-    phone: profile.phone || '',
-    address: profile.address || '',
-    city: profile.city || '',
-    state: profile.state || '',
-    postalCode: profile.postal_code || '',
-    orders: orders,
-    totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
-    orderCount: orders.length
-  };
-};

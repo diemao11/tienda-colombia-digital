@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Order, OrderStatus } from "@/pages/admin/OrdersPage";
 
@@ -11,6 +10,10 @@ export const fetchOrders = async () => {
       status,
       total,
       created_at,
+      shipping_address,
+      shipping_city,
+      shipping_state,
+      shipping_postal_code,
       profiles(first_name, last_name)
     `)
     .order('created_at', { ascending: false });
@@ -20,17 +23,14 @@ export const fetchOrders = async () => {
     throw error;
   }
 
-  // Transformar los datos para que coincidan con la estructura de Order
+  // Transform the data to match the Order interface
   return data.map(item => {
     let firstName = '';
     let lastName = '';
     
     if (item.profiles) {
-      // Make a local copy for type checking
       const profilesData = item.profiles;
-      // Ensure profilesData is not null before accessing
       if (profilesData && typeof profilesData === 'object') {
-        // TypeScript now knows profiles has these properties
         firstName = (profilesData as { first_name?: string }).first_name || '';
         lastName = (profilesData as { last_name?: string }).last_name || '';
       }
@@ -46,7 +46,15 @@ export const fetchOrders = async () => {
       date: item.created_at,
       total: item.total,
       status: item.status as OrderStatus,
-      items: 0 // Se cargará después con una consulta adicional
+      customerDetails: {
+        name: customerName,
+        phone: '',
+        address: item.shipping_address || '',
+        city: item.shipping_city || '',
+        state: item.shipping_state || '',
+        postalCode: item.shipping_postal_code || ''
+      },
+      items: 0 // Will be populated when viewing details
     };
   }) as Order[];
 };

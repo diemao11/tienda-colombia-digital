@@ -1,4 +1,3 @@
-
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -12,13 +11,13 @@ import { fetchCustomers } from "@/services/customerService";
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Consulta para obtener clientes
+  // Query to fetch customers
   const { data: customers = [], isLoading, error } = useQuery({
     queryKey: ['customers'],
     queryFn: fetchCustomers
   });
   
-  // Función para filtrar clientes por nombre o email
+  // Function to filter customers by name or email
   const filteredCustomers = customers.filter(customer => 
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.email.toLowerCase().includes(searchQuery.toLowerCase())
