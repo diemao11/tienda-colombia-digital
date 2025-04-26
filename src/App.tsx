@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -34,9 +33,15 @@ import OrdersPage from "./pages/admin/OrdersPage";
 // Create QueryClient instance outside the component to avoid recreation on renders
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
+// Updated ProtectedRoute component to handle admin routes
+const ProtectedRoute = ({ 
+  children, 
+  requiresAdmin = false 
+}: { 
+  children: React.ReactNode;
+  requiresAdmin?: boolean;
+}) => {
+  const { user, isLoading, userRole } = useAuth();
   
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
@@ -44,6 +49,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (requiresAdmin && userRole !== 'admin') {
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -63,7 +72,7 @@ const App = () => {
                   <Navbar />
                   <main className="flex-1">
                     <Routes>
-                      {/* Rutas de la tienda */}
+                      {/* Public routes */}
                       <Route path="/" element={<HomePage />} />
                       <Route path="/tienda" element={<ShopPage />} />
                       <Route path="/categoria/:category" element={<CategoryPage />} />
@@ -76,13 +85,45 @@ const App = () => {
                       <Route path="/contacto" element={<ContactPage />} />
                       <Route path="/auth" element={<AuthPage />} />
                       
-                      {/* Rutas del panel de administración */}
-                      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                      <Route path="/admin/productos" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-                      <Route path="/admin/clientes" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
-                      <Route path="/admin/pedidos" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+                      {/* Protected routes that require admin */}
+                      <Route 
+                        path="/admin" 
+                        element={
+                          <ProtectedRoute requiresAdmin>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/productos" 
+                        element={
+                          <ProtectedRoute requiresAdmin>
+                            <ProductsPage />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/clientes" 
+                        element={
+                          <ProtectedRoute requiresAdmin>
+                            <CustomersPage />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/admin/pedidos" 
+                        element={
+                          <ProtectedRoute requiresAdmin>
+                            <OrdersPage />
+                          </ProtectedRoute>
+                        } 
+                      />
                       
-                      {/* Ruta 404 */}
+                      {/* Regular protected routes */}
+                      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                      <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
+                      
+                      {/* 404 Route */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>

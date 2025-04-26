@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ import {
 
 const Navbar = () => {
   const { cart } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRole } = useAuth();
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
@@ -103,10 +102,14 @@ const Navbar = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/admin">Panel de administración</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {userRole === 'admin' && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin">Panel de administración</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
                   Cerrar sesión
@@ -175,4 +178,3 @@ const navigationMenuTriggerStyle = () => {
 };
 
 export default Navbar;
-
