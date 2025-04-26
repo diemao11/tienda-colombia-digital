@@ -1,7 +1,7 @@
 
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { MainLayout } from "./layouts/MainLayout";
@@ -40,7 +40,8 @@ const App = () => {
           <BrowserRouter>
             <MainLayout>
               <Routes>
-                {/* Public Routes */}
+                {/* Redirect from empty path to HomePage */}
+                <Route index element={<HomePage />} />
                 <Route path="/" element={<HomePage />} />
                 <Route path="/tienda" element={<ShopPage />} />
                 <Route path="/categoria/:category" element={<CategoryPage />} />
