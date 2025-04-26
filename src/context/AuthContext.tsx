@@ -21,23 +21,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Función para obtener el rol del usuario de forma segura
+  // Función para obtener el rol del usuario de forma segura utilizando la función de la BD
   const fetchUserRole = async (userId: string) => {
     try {
-      // Importante: usar maybeSingle en lugar de single para evitar errores cuando no hay resultados
+      // Utilizamos la función que hemos creado en la base de datos
       const { data, error } = await supabase
-        .from('roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
+        .rpc('get_user_role', { user_id: userId });
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user role using RPC:', error);
         return 'user';
       }
 
-      console.log('Fetched role data:', data);
-      return data?.role || 'user';
+      console.log('Fetched role from RPC:', data);
+      return data || 'user';
     } catch (error) {
       console.error('Error in fetchUserRole:', error);
       return 'user';
@@ -45,39 +42,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Primero configuramos el listener para cambios en el estado de autenticación
+    console.log('Setting up auth state listener');
+    
+    // Configuramos el listener para cambios en el estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
-        // Actualizamos inmediatamente el estado de sesión (sin esperar)
+        // Actualizamos inmediatamente el estado de sesión
         setSession(session);
         
         // Si hay un usuario en la sesión, obtenemos su rol
         if (session?.user) {
-          // Importante: usar setTimeout para evitar bloqueos con otros listeners
+          // Usamos setTimeout para evitar conflictos con otros listeners
           setTimeout(async () => {
             try {
               const role = await fetchUserRole(session.user.id);
               console.log('User role:', role);
               setUser({ ...session.user, role });
+              setIsLoading(false);
             } catch (error) {
               console.error('Error setting user with role:', error);
               setUser(session.user);
+              setIsLoading(false);
             }
           }, 0);
         } else {
           setUser(null);
-        }
-        
-        if (event !== 'INITIAL_SESSION') {
           setIsLoading(false);
         }
       }
     );
 
-    // Luego verificamos si ya existe una sesión
+    // Verificamos si ya existe una sesión
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
+      
       if (session?.user) {
         try {
           const role = await fetchUserRole(session.user.id);
@@ -87,7 +87,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error('Error setting initial user with role:', error);
           setUser(session.user);
         }
+      } else {
+        console.log('No initial session found');
       }
+      
       setSession(session);
       setIsLoading(false);
     });

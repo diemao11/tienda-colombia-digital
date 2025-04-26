@@ -42,6 +42,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   console.log("ProtectedRoute checking access. User:", user?.email, "Role:", user?.role, "Admin only:", adminOnly);
   
   if (isLoading) {
+    console.log("Auth is still loading...");
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
   
@@ -51,11 +52,11 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   }
   
   if (adminOnly && user.role !== 'admin') {
-    console.log("User is not admin, redirecting to home");
+    console.log("User is not admin, redirecting to home. User role:", user.role);
     return <Navigate to="/" replace />;
   }
   
-  console.log("Access granted");
+  console.log("Access granted to", adminOnly ? "admin route" : "protected route");
   return <>{children}</>;
 };
 
