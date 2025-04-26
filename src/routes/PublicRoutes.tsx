@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import ShopPage from "@/pages/ShopPage";
 import CategoryPage from "@/pages/CategoryPage";
@@ -22,8 +22,22 @@ export const PublicRoutes = () => {
       <Route path="/categoria/:category/:subcategory" element={<CategoryPage />} />
       <Route path="/producto/:id" element={<ProductDetailPage />} />
       <Route path="/carrito" element={<CartPage />} />
-      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-      <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
+      <Route 
+        path="/checkout" 
+        element={
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/pedido-exitoso" 
+        element={
+          <ProtectedRoute>
+            <OrderSuccessPage />
+          </ProtectedRoute>
+        } 
+      />
       <Route path="/nosotros" element={<AboutPage />} />
       <Route path="/contacto" element={<ContactPage />} />
       <Route path="/auth" element={<AuthPage />} />

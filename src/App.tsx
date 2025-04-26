@@ -24,7 +24,6 @@ const App = () => {
             <BrowserRouter>
               <MainLayout>
                 <Routes>
-                  {/* Include route groups directly - no need for extra fragments */}
                   <PublicRoutes />
                   <UserRoutes />
                   <AdminRoutes />
