@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,7 +37,7 @@ const authFormSchema = z.object({
 type AuthFormValues = z.infer<typeof authFormSchema>;
 
 const AuthPage = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, refreshUserRole } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -59,10 +58,10 @@ const AuthPage = () => {
     try {
       if (activeTab === "login") {
         await signIn(values.email, values.password);
+        await refreshUserRole();
         navigate("/");
       } else {
         await signUp(values.email, values.password);
-        // Stay on the login page after signup for confirmation
         setActiveTab("login");
         form.reset();
       }

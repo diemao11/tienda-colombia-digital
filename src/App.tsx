@@ -36,10 +36,17 @@ const queryClient = new QueryClient();
 
 // Protected route component
 const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUserRole } = useAuth();
   const location = useLocation();
   
   console.log("ProtectedRoute checking access. User:", user?.email, "Role:", user?.role, "Admin only:", adminOnly);
+  
+  React.useEffect(() => {
+    // Actualizar automáticamente el rol del usuario cuando se intenta acceder a una ruta protegida
+    if (user && adminOnly) {
+      refreshUserRole();
+    }
+  }, [user, adminOnly, refreshUserRole, location.pathname]);
   
   if (isLoading) {
     console.log("Auth is still loading...");

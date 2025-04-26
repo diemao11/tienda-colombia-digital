@@ -11,6 +11,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUserRole: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Función para obtener el rol del usuario de forma segura utilizando la función de la BD
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log("Fetching user role for", userId);
       // Utilizamos la función que hemos creado en la base de datos
       const { data, error } = await supabase
         .rpc('get_user_role', { user_id: userId });
@@ -41,12 +43,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Nueva función para actualizar manualmente el rol del usuario
+  const refreshUserRole = async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const role = await fetchUserRole(user.id);
+      console.log('Refreshed user role:', role);
+      setUser({ ...user, role });
+    } catch (error) {
+      console.error('Error refreshing user role:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log('Setting up auth state listener');
     
     // Configuramos el listener para cambios en el estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
         // Actualizamos inmediatamente el estado de sesión
@@ -161,6 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signIn,
         signUp,
         signOut,
+        refreshUserRole,
       }}
     >
       {children}
