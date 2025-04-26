@@ -76,11 +76,12 @@ const ProductGrid = ({ products, title }: ProductGridProps) => {
               viewport={{ once: true, margin: "-50px" }}
               className="border rounded-lg p-4 flex flex-col md:flex-row"
             >
-              <div className="md:w-48 h-48 flex-shrink-0 mb-4 md:mb-0 md:mr-4">
+              <div className="md:w-48 h-48 flex-shrink-0 mb-4 md:mb-0 md:mr-4 bg-gray-50">
                 <img
                   src={product.images[0] || "/placeholder.svg"}
                   alt={product.name}
-                  className="w-full h-full object-cover rounded-md"
+                  className="w-full h-full object-contain p-2 rounded-md"
+                  loading="lazy"
                 />
               </div>
               <div className="flex-1 flex flex-col">

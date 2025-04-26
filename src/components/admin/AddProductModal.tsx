@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { ProductFormData, createProduct } from "@/services/productService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, X } from "lucide-react";
+import { Upload, X, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Esquema de validación para el formulario
@@ -50,6 +50,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
   const queryClient = useQueryClient();
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Inicializar formulario con React Hook Form y Zod
   const form = useForm<z.infer<typeof productSchema>>({
@@ -77,6 +78,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
       onSuccess?.();
       form.reset();
       setUploadedImages([]);
+      setUploadError(null);
       onOpenChange(false);
     },
     onError: (error) => {
@@ -94,17 +96,30 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
+    setUploadError(null);
     try {
       const newImages: string[] = [];
 
       for (const file of Array.from(files)) {
+        // Validar tamaño y tipo de archivo
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`El archivo ${file.name} excede el tamaño máximo de 5MB`);
+        }
+
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+          throw new Error(`El archivo ${file.name} no es una imagen válida`);
+        }
+
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `products/${fileName}`;
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
 
         const { error: uploadError, data } = await supabase.storage
           .from('products')
-          .upload(filePath, file);
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) throw uploadError;
 
@@ -121,11 +136,12 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
         title: "Imágenes subidas",
         description: "Las imágenes se han subido correctamente.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
+      setUploadError(error.message || "Error al subir las imágenes");
       toast({
         title: "Error",
-        description: "Error al subir las imágenes. Por favor, intenta de nuevo.",
+        description: error.message || "Error al subir las imágenes. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -220,14 +236,24 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
             {/* Image upload section */}
             <div className="space-y-4">
               <FormLabel>Imágenes del producto</FormLabel>
+              
+              {uploadError && (
+                <div className="bg-red-50 p-3 rounded-md flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                  <div className="text-sm text-red-600">{uploadError}</div>
+                </div>
+              )}
+              
               <div className="flex flex-wrap gap-4">
                 {uploadedImages.map((url, index) => (
                   <div key={url} className="relative">
-                    <img
-                      src={url}
-                      alt={`Product ${index + 1}`}
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
+                    <div className="w-24 h-24 border rounded-md overflow-hidden bg-gray-50">
+                      <img
+                        src={url}
+                        alt={`Product ${index + 1}`}
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </div>
                     <Button
                       type="button"
                       variant="destructive"
@@ -243,7 +269,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
               <div className="flex items-center gap-4">
                 <Input
                   type="file"
-                  accept="image/*"
+                  accept="image/png, image/jpeg, image/webp, image/gif"
                   multiple
                   onChange={handleImageUpload}
                   className="hidden"
@@ -259,6 +285,9 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
                   <Upload className="mr-2 h-4 w-4" />
                   {isUploading ? "Subiendo..." : "Subir imágenes"}
                 </Button>
+                <div className="text-sm text-gray-500">
+                  Formatos permitidos: JPG, PNG, WebP, GIF. Máx 5MB.
+                </div>
               </div>
             </div>
             
@@ -345,6 +374,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
                   onOpenChange(false);
                   form.reset();
                   setUploadedImages([]);
+                  setUploadError(null);
                 }}
               >
                 Cancelar

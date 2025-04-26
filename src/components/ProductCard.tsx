@@ -40,8 +40,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={imageUrl}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover product-image transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-contain p-2 product-image transition-transform duration-500 group-hover:scale-105"
             onError={handleImageError}
+            loading="lazy"
           />
           <div className="absolute top-2 right-2 flex flex-col gap-2">
             <motion.button 
