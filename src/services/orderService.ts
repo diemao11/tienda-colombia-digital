@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Order, OrderStatus } from "@/pages/admin/OrdersPage";
 
@@ -89,11 +90,8 @@ export const fetchOrderWithItems = async (id: string) => {
   let phone = '';
   
   if (order.profiles) {
-    // Make a local copy for type checking
     const profilesData = order.profiles;
-    // Ensure profilesData is not null before accessing
     if (profilesData && typeof profilesData === 'object') {
-      // TypeScript now knows profiles has these properties
       firstName = (profilesData as { first_name?: string }).first_name || '';
       lastName = (profilesData as { last_name?: string }).last_name || '';
       phone = (profilesData as { phone?: string }).phone || '';

@@ -9,8 +9,9 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OrdersTableHeader from "@/components/admin/orders/OrdersTableHeader";
 import OrdersTable from "@/components/admin/orders/OrdersTable";
+import { useAuth } from "@/context/AuthContext";
+import { Navigate } from "react-router-dom";
 
-// Types
 export type OrderStatus = "pending" | "processing" | "shipping" | "completed" | "cancelled";
 
 export interface OrderItem {
@@ -45,11 +46,13 @@ export default function OrdersPage() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   // Queries
   const { data: orders = [], isLoading, error } = useQuery({
     queryKey: ['orders'],
-    queryFn: fetchOrders
+    queryFn: fetchOrders,
+    retry: 1
   });
 
   // Order details query
