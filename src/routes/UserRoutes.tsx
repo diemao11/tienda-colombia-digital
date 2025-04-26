@@ -6,6 +6,8 @@ import ProfilePage from "@/pages/user/ProfilePage";
 import OrdersPage from "@/pages/user/OrdersPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
+// Esta función ya no se usa directamente en App.tsx
+// Se mantiene como referencia para futuras modificaciones
 export const UserRoutes = () => {
   return (
     <>

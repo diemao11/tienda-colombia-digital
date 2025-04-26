@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import ShopPage from "@/pages/ShopPage";
 import CategoryPage from "@/pages/CategoryPage";
@@ -13,6 +13,8 @@ import ContactPage from "@/pages/ContactPage";
 import AuthPage from "@/pages/AuthPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 
+// Esta función ya no se usa directamente en App.tsx
+// Se mantiene como referencia para futuras modificaciones
 export const PublicRoutes = () => {
   return (
     <>
