@@ -5,10 +5,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { MainLayout } from "./layouts/MainLayout";
+import NotFound from "./pages/NotFound";
+
+// Import route components - these will now return Route elements
 import { PublicRoutes } from "./routes/PublicRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
 import { AdminRoutes } from "./routes/AdminRoutes";
-import NotFound from "./pages/NotFound";
 
 // Create QueryClient instance outside the component to avoid recreation on renders
 const queryClient = new QueryClient();
@@ -22,9 +24,16 @@ const App = () => {
             <BrowserRouter>
               <MainLayout>
                 <Routes>
-                  <PublicRoutes />
-                  <UserRoutes />
-                  <AdminRoutes />
+                  {/* Use fragments to include the route groups */}
+                  <React.Fragment>
+                    <PublicRoutes />
+                  </React.Fragment>
+                  <React.Fragment>
+                    <UserRoutes />
+                  </React.Fragment>
+                  <React.Fragment>
+                    <AdminRoutes />
+                  </React.Fragment>
                   
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />
