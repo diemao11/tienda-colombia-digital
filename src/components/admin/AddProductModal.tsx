@@ -47,7 +47,7 @@ export default function AddProductModal({ open, onOpenChange, onSuccess }: AddPr
 
   const createProductMutation = useMutation({
     mutationFn: async (data: z.infer<typeof productSchema>) => {
-      // Ensure all required properties are properly typed as required
+      // Asegurar que todos los campos obligatorios estén correctamente tipados
       const productData = {
         name: data.name,
         description: data.description,

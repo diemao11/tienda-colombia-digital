@@ -79,119 +79,158 @@ export const fetchProduct = async (id: string) => {
 };
 
 export const createProduct = async (productData: ProductFormData) => {
-  // Primero buscamos o creamos la categoría
-  let categoryId = null;
-  if (productData.category) {
-    const { data: categoryData } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('name', productData.category)
-      .single();
+  try {
+    console.log("Creating product with data:", productData);
     
-    if (categoryData) {
-      categoryId = categoryData.id;
-    } else {
-      // Crear la categoría si no existe
-      const slug = productData.category.toLowerCase().replace(/\s+/g, '-');
-      const { data: newCategory, error: categoryError } = await supabase
+    // Primero buscamos o creamos la categoría
+    let categoryId = null;
+    if (productData.category) {
+      // Buscar si ya existe la categoría
+      const { data: existingCategory } = await supabase
         .from('categories')
-        .insert({ name: productData.category, slug })
         .select('id')
-        .single();
+        .eq('name', productData.category)
+        .maybeSingle();
       
-      if (categoryError) throw categoryError;
-      categoryId = newCategory.id;
+      if (existingCategory) {
+        categoryId = existingCategory.id;
+        console.log("Category exists, using id:", categoryId);
+      } else {
+        // Crear la categoría si no existe
+        const slug = productData.category.toLowerCase().replace(/\s+/g, '-');
+        const { data: newCategory, error: categoryError } = await supabase
+          .from('categories')
+          .insert({ name: productData.category, slug })
+          .select('id')
+          .single();
+        
+        if (categoryError) {
+          console.error("Error creating category:", categoryError);
+          throw categoryError;
+        }
+        categoryId = newCategory.id;
+        console.log("Created new category with id:", categoryId);
+      }
     }
-  }
 
-  // Luego buscamos o creamos la subcategoría si tenemos una categoría
-  let subcategoryId = null;
-  if (productData.subcategory && categoryId) {
-    const { data: subcategoryData } = await supabase
-      .from('subcategories')
-      .select('id')
-      .eq('name', productData.subcategory)
-      .eq('category_id', categoryId)
-      .single();
-    
-    if (subcategoryData) {
-      subcategoryId = subcategoryData.id;
-    } else {
-      // Crear la subcategoría si no existe
-      const slug = productData.subcategory.toLowerCase().replace(/\s+/g, '-');
-      const { data: newSubcategory, error: subcategoryError } = await supabase
+    // Luego buscamos o creamos la subcategoría si tenemos una categoría
+    let subcategoryId = null;
+    if (productData.subcategory && categoryId) {
+      // Buscar si ya existe la subcategoría
+      const { data: existingSubcategory } = await supabase
         .from('subcategories')
-        .insert({ name: productData.subcategory, slug, category_id: categoryId })
         .select('id')
-        .single();
+        .eq('name', productData.subcategory)
+        .eq('category_id', categoryId)
+        .maybeSingle();
       
-      if (subcategoryError) throw subcategoryError;
-      subcategoryId = newSubcategory.id;
+      if (existingSubcategory) {
+        subcategoryId = existingSubcategory.id;
+        console.log("Subcategory exists, using id:", subcategoryId);
+      } else {
+        // Crear la subcategoría si no existe
+        const slug = productData.subcategory.toLowerCase().replace(/\s+/g, '-');
+        const { data: newSubcategory, error: subcategoryError } = await supabase
+          .from('subcategories')
+          .insert({ 
+            name: productData.subcategory, 
+            slug, 
+            category_id: categoryId 
+          })
+          .select('id')
+          .single();
+        
+        if (subcategoryError) {
+          console.error("Error creating subcategory:", subcategoryError);
+          throw subcategoryError;
+        }
+        subcategoryId = newSubcategory.id;
+        console.log("Created new subcategory with id:", subcategoryId);
+      }
     }
-  }
 
-  // Buscamos o creamos la marca
-  let brandId = null;
-  if (productData.brand) {
-    const { data: brandData } = await supabase
-      .from('brands')
-      .select('id')
-      .eq('name', productData.brand)
-      .single();
-    
-    if (brandData) {
-      brandId = brandData.id;
-    } else {
-      // Crear la marca si no existe
-      const { data: newBrand, error: brandError } = await supabase
+    // Buscamos o creamos la marca
+    let brandId = null;
+    if (productData.brand) {
+      // Buscar si ya existe la marca
+      const { data: existingBrand } = await supabase
         .from('brands')
-        .insert({ name: productData.brand })
         .select('id')
-        .single();
+        .eq('name', productData.brand)
+        .maybeSingle();
       
-      if (brandError) throw brandError;
-      brandId = newBrand.id;
+      if (existingBrand) {
+        brandId = existingBrand.id;
+        console.log("Brand exists, using id:", brandId);
+      } else {
+        // Crear la marca si no existe
+        const { data: newBrand, error: brandError } = await supabase
+          .from('brands')
+          .insert({ name: productData.brand })
+          .select('id')
+          .single();
+        
+        if (brandError) {
+          console.error("Error creating brand:", brandError);
+          throw brandError;
+        }
+        brandId = newBrand.id;
+        console.log("Created new brand with id:", brandId);
+      }
     }
+
+    // Crear el slug del producto
+    const slug = productData.name.toLowerCase().replace(/\s+/g, '-');
+
+    // Insertamos el producto
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .insert({
+        name: productData.name,
+        slug,
+        description: productData.description,
+        price: productData.price,
+        stock: productData.stock,
+        category_id: categoryId,
+        subcategory_id: subcategoryId,
+        brand_id: brandId,
+        features: productData.features
+      })
+      .select('id')
+      .single();
+
+    if (productError) {
+      console.error("Error creating product:", productError);
+      throw productError;
+    }
+    
+    console.log("Product created with id:", product.id);
+
+    // Insertamos las imágenes del producto
+    if (productData.images && productData.images.length > 0) {
+      const imagesData = productData.images.map((url, index) => ({
+        product_id: product.id,
+        url,
+        position: index
+      }));
+
+      const { error: imagesError } = await supabase
+        .from('product_images')
+        .insert(imagesData);
+
+      if (imagesError) {
+        console.error("Error creating product images:", imagesError);
+        throw imagesError;
+      }
+      
+      console.log("Added images for product:", imagesData.length);
+    }
+
+    return product.id;
+  } catch (error) {
+    console.error("Complete error in createProduct:", error);
+    throw error;
   }
-
-  // Crear el slug del producto
-  const slug = productData.name.toLowerCase().replace(/\s+/g, '-');
-
-  // Insertamos el producto
-  const { data: product, error: productError } = await supabase
-    .from('products')
-    .insert({
-      name: productData.name,
-      slug,
-      description: productData.description,
-      price: productData.price,
-      stock: productData.stock,
-      category_id: categoryId,
-      subcategory_id: subcategoryId,
-      brand_id: brandId,
-      features: productData.features
-    })
-    .select('id')
-    .single();
-
-  if (productError) throw productError;
-
-  // Insertamos las imágenes del producto
-  if (productData.images && productData.images.length > 0) {
-    const imagesData = productData.images.map((url, index) => ({
-      product_id: product.id,
-      url,
-      position: index
-    }));
-
-    const { error: imagesError } = await supabase
-      .from('product_images')
-      .insert(imagesData);
-
-    if (imagesError) throw imagesError;
-  }
-
-  return product.id;
 };
 
 export const updateProduct = async (id: string, productData: ProductFormData) => {
