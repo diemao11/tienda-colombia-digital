@@ -48,6 +48,11 @@ export default function OrdersPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
+  // Check if user is an admin
+  if (!user || user.email !== 'diemaourquijo@gmail.com') {
+    return <Navigate to="/" replace />;
+  }
+
   // Queries
   const { data: orders = [], isLoading, error } = useQuery({
     queryKey: ['orders'],
