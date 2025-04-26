@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -24,11 +25,16 @@ import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 
+// User Pages
+import UserDashboard from "./pages/user/UserDashboard";
+import ProfilePage from "./pages/user/ProfilePage";
+import OrdersPage from "./pages/user/OrdersPage";
+
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductsPage from "./pages/admin/ProductsPage";
 import CustomersPage from "./pages/admin/CustomersPage";
-import OrdersPage from "./pages/admin/OrdersPage";
+import OrdersPage as AdminOrdersPage from "./pages/admin/OrdersPage";
 
 // Create QueryClient instance outside the component to avoid recreation on renders
 const queryClient = new QueryClient();
@@ -127,14 +133,10 @@ const App = () => {
                         path="/admin/pedidos" 
                         element={
                           <ProtectedRoute requiresAdmin>
-                            <OrdersPage />
+                            <AdminOrdersPage />
                           </ProtectedRoute>
                         } 
                       />
-                      
-                      {/* Regular protected routes */}
-                      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-                      <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
                       
                       {/* 404 Route */}
                       <Route path="*" element={<NotFound />} />
