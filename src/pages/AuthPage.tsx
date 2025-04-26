@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,7 +58,6 @@ const AuthPage = () => {
     try {
       if (activeTab === "login") {
         await signIn(values.email, values.password);
-        // Forzamos una actualización del rol después del inicio de sesión
         await refreshUserRole();
         console.log("Inicio de sesión exitoso, navegando a la página principal");
         navigate("/");
