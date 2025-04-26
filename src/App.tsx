@@ -34,7 +34,7 @@ import OrdersPage from "./pages/user/OrdersPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductsPage from "./pages/admin/ProductsPage";
 import CustomersPage from "./pages/admin/CustomersPage";
-import OrdersPage as AdminOrdersPage from "./pages/admin/OrdersPage";
+import AdminOrdersPage from "./pages/admin/OrdersPage";
 
 // Create QueryClient instance outside the component to avoid recreation on renders
 const queryClient = new QueryClient();
