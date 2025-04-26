@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -44,9 +43,10 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   React.useEffect(() => {
     // Actualizar automáticamente el rol del usuario cuando se intenta acceder a una ruta protegida
     if (user && adminOnly) {
+      console.log("Refreshing user role for admin route access");
       refreshUserRole();
     }
-  }, [user, adminOnly, refreshUserRole, location.pathname]);
+  }, [user, adminOnly, refreshUserRole]);
   
   if (isLoading) {
     console.log("Auth is still loading...");
