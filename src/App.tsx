@@ -85,6 +85,19 @@ const App = () => {
                       <Route path="/contacto" element={<ContactPage />} />
                       <Route path="/auth" element={<AuthPage />} />
                       
+                      {/* User routes */}
+                      <Route 
+                        path="/cuenta" 
+                        element={
+                          <ProtectedRoute>
+                            <UserDashboard />
+                          </ProtectedRoute>
+                        }
+                      >
+                        <Route path="perfil" element={<ProfilePage />} />
+                        <Route path="pedidos" element={<OrdersPage />} />
+                      </Route>
+
                       {/* Protected routes that require admin */}
                       <Route 
                         path="/admin" 
