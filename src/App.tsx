@@ -47,72 +47,23 @@ const App = () => {
                 <Route path="/categoria/:category/:subcategory" element={<CategoryPage />} />
                 <Route path="/producto/:id" element={<ProductDetailPage />} />
                 <Route path="/carrito" element={<CartPage />} />
-                <Route 
-                  path="/checkout" 
-                  element={
-                    <ProtectedRoute>
-                      <CheckoutPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/pedido-exitoso" 
-                  element={
-                    <ProtectedRoute>
-                      <OrderSuccessPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+                <Route path="/pedido-exitoso" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
                 <Route path="/nosotros" element={<AboutPage />} />
                 <Route path="/contacto" element={<ContactPage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 
                 {/* User Routes */}
-                <Route 
-                  path="/cuenta" 
-                  element={
-                    <ProtectedRoute>
-                      <UserDashboard />
-                    </ProtectedRoute>
-                  }
-                >
+                <Route path="/cuenta" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>}>
                   <Route path="perfil" element={<ProfilePage />} />
                   <Route path="pedidos" element={<OrdersPage />} />
                 </Route>
                 
                 {/* Admin Routes */}
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedRoute requiresAdmin>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/productos" 
-                  element={
-                    <ProtectedRoute requiresAdmin>
-                      <ProductsPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/clientes" 
-                  element={
-                    <ProtectedRoute requiresAdmin>
-                      <CustomersPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/pedidos" 
-                  element={
-                    <ProtectedRoute requiresAdmin>
-                      <AdminOrdersPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                <Route path="/admin" element={<ProtectedRoute requiresAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin/productos" element={<ProtectedRoute requiresAdmin={true}><ProductsPage /></ProtectedRoute>} />
+                <Route path="/admin/clientes" element={<ProtectedRoute requiresAdmin={true}><CustomersPage /></ProtectedRoute>} />
+                <Route path="/admin/pedidos" element={<ProtectedRoute requiresAdmin={true}><AdminOrdersPage /></ProtectedRoute>} />
                 
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
