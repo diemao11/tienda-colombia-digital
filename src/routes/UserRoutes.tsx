@@ -8,16 +8,18 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 export const UserRoutes = () => {
   return (
-    <Route 
-      path="/cuenta" 
-      element={
-        <ProtectedRoute>
-          <UserDashboard />
-        </ProtectedRoute>
-      }
-    >
-      <Route path="perfil" element={<ProfilePage />} />
-      <Route path="pedidos" element={<OrdersPage />} />
-    </Route>
+    <>
+      <Route 
+        path="/cuenta" 
+        element={
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="perfil" element={<ProfilePage />} />
+        <Route path="pedidos" element={<OrdersPage />} />
+      </Route>
+    </>
   );
 };

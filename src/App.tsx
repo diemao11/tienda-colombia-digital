@@ -24,16 +24,10 @@ const App = () => {
             <BrowserRouter>
               <MainLayout>
                 <Routes>
-                  {/* Use fragments to include the route groups */}
-                  <React.Fragment>
-                    <PublicRoutes />
-                  </React.Fragment>
-                  <React.Fragment>
-                    <UserRoutes />
-                  </React.Fragment>
-                  <React.Fragment>
-                    <AdminRoutes />
-                  </React.Fragment>
+                  {/* Include route groups directly - no need for extra fragments */}
+                  <PublicRoutes />
+                  <UserRoutes />
+                  <AdminRoutes />
                   
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />
