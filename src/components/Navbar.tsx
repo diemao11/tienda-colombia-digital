@@ -27,6 +27,8 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
+  const isAdmin = user?.role === 'admin';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-xl items-center justify-between">
@@ -103,9 +105,11 @@ const Navbar = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/admin">Panel de administración</Link>
-                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">Panel de administración</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
@@ -175,4 +179,3 @@ const navigationMenuTriggerStyle = () => {
 };
 
 export default Navbar;
-

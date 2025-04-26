@@ -23,25 +23,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchUserRole = async (userId: string) => {
-      const { data, error } = await supabase
-        .from('roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('roles')
+          .select('role')
+          .eq('user_id', userId)
+          .single();
 
-      if (error) {
-        console.error('Error fetching user role:', error);
+        if (error) {
+          console.error('Error fetching user role:', error);
+          return 'user';
+        }
+
+        return data?.role || 'user';
+      } catch (error) {
+        console.error('Error in fetchUserRole:', error);
         return 'user';
       }
-
-      return data?.role || 'user';
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
-          setUser({ ...session.user, role });
+          try {
+            const role = await fetchUserRole(session.user.id);
+            console.log('User role:', role);
+            setUser({ ...session.user, role });
+          } catch (error) {
+            console.error('Error setting user with role:', error);
+            setUser(session.user);
+          }
         } else {
           setUser(null);
         }
@@ -53,8 +65,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Initial session check
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id);
-        setUser({ ...session.user, role });
+        try {
+          const role = await fetchUserRole(session.user.id);
+          console.log('Initial session user role:', role);
+          setUser({ ...session.user, role });
+        } catch (error) {
+          console.error('Error setting initial user with role:', error);
+          setUser(session.user);
+        }
       }
       setSession(session);
       setIsLoading(false);
