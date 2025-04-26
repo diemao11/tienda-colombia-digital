@@ -18,18 +18,41 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { getProductById, formatPrice } from "@/data/products";
+import { formatPrice } from "@/data/products";
 import ProductGrid from "@/components/ProductGrid";
-import { products } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProduct, fetchProducts } from "@/services/product/productService";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const product = getProductById(id || "");
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  
+  // Obtener el producto usando React Query
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => fetchProduct(id || ""),
+    enabled: !!id
+  });
+  
+  // Obtener productos relacionados
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts
+  });
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="text-center py-16">
@@ -46,7 +69,7 @@ const ProductDetailPage = () => {
   }
 
   // Get related products from the same category
-  const relatedProducts = products
+  const relatedProducts = allProducts
     .filter(
       (p) => p.category === product.category && p.id !== product.id
     )
@@ -77,6 +100,20 @@ const ProductDetailPage = () => {
       return <Badge variant="secondary" className="bg-green-100 text-green-800">En Stock</Badge>;
     }
   };
+  
+  // Función para mostrar el nombre de la categoría en español
+  const getCategoryDisplayName = (category: string) => {
+    switch(category) {
+      case "furniture":
+        return "Muebles";
+      case "electronics":
+        return "Electrónica";
+      case "technology":
+        return "Tecnología";
+      default:
+        return category;
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-8">
@@ -88,8 +125,7 @@ const ProductDetailPage = () => {
           to={`/categoria/${product.category}`} 
           className="hover:text-brand-600"
         >
-          {product.category === "furniture" ? "Muebles" : 
-          product.category === "electronics" ? "Electrónica" : "Tecnología"}
+          {getCategoryDisplayName(product.category)}
         </Link>
         <span className="mx-2">/</span>
         <span className="text-gray-700">{product.name}</span>
@@ -154,7 +190,7 @@ const ProductDetailPage = () => {
               )}
             </div>
             <div className="text-sm text-gray-500">
-              <span>SKU: {product.id.toUpperCase()}</span>
+              <span>SKU: {product.id.toUpperCase().substring(0, 8)}</span>
             </div>
           </div>
           
@@ -251,23 +287,29 @@ const ProductDetailPage = () => {
         <TabsContent value="details" className="p-4 border rounded-md mt-4">
           <h3 className="text-xl font-semibold mb-4">Descripción del producto</h3>
           <p className="text-gray-700 mb-4">{product.description}</p>
+          {product.brand && (
+            <p className="text-gray-700 mb-4">
+              <strong>Marca:</strong> {product.brand}
+            </p>
+          )}
           <p className="text-gray-700">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget
-            aliquam nisl nisl eget nisl. Nullam auctor, nisl eget ultricies
-            tincidunt, nisl nisl aliquam nisl, eget aliquam nisl nisl eget nisl.
+            Compra con confianza en nuestra tienda. Este producto viene con garantía y soporte técnico.
           </p>
         </TabsContent>
         <TabsContent value="features" className="p-4 border rounded-md mt-4">
           <h3 className="text-xl font-semibold mb-4">Características</h3>
-          <ul className="space-y-2">
-            {product.features.map((feature, index) => (
-              <li key={index} className="flex items-start">
-                <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
+          {product.features && product.features.length > 0 ? (
+            <ul className="space-y-2">
+              {product.features.map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">No hay características detalladas disponibles para este producto.</p>
+          )}
         </TabsContent>
         <TabsContent value="reviews" className="p-4 border rounded-md mt-4">
           <h3 className="text-xl font-semibold mb-4">Reseñas de clientes</h3>

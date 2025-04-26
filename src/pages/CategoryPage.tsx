@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { FilterX, SlidersHorizontal } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
-import { products } from "@/data/products";
 import { formatPrice } from "@/data/products";
 import {
   Sheet,
@@ -19,7 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProducts } from "@/services/productService";
+import { fetchProducts } from "@/services/product/productService";
 
 const CategoryPage = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory: string }>();
@@ -40,19 +39,6 @@ const CategoryPage = () => {
     queryKey: ['products'],
     queryFn: fetchProducts
   });
-
-  // Get normalized category for filtering
-  const getNormalizedCategory = () => {
-    if (!validCategory) return null;
-    
-    // Map displayed Spanish categories back to database English values for filtering
-    switch(validCategory) {
-      case "furniture": return "muebles";
-      case "electronics": return "electrónica";
-      case "technology": return "tecnología";
-      default: return validCategory;
-    }
-  };
 
   // Get category label
   const getCategoryLabel = () => {
@@ -75,10 +61,10 @@ const CategoryPage = () => {
   // Filter products based on category, subcategory, and other filters
   const filteredProducts = dbProducts.filter(product => {
     // For debugging
-    console.log("Filtering product:", product.name, "Category:", product.category, "Looking for:", getNormalizedCategory());
+    console.log("Filtering product:", product.name, "Category:", product.category, "Looking for:", validCategory);
     
-    // Category filter - compare with normalized category
-    if (validCategory && product.category.toLowerCase() !== getNormalizedCategory()) {
+    // Category filter - use validCategory directly since it's already normalized
+    if (validCategory && product.category !== validCategory) {
       return false;
     }
     
