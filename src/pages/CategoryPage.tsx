@@ -18,6 +18,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "@/services/productService";
 
 const CategoryPage = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory: string }>();
@@ -32,7 +34,25 @@ const CategoryPage = () => {
     inStock: false,
     onSale: false,
   });
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Fetch products from the database
+  const { data: dbProducts = [], isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts
+  });
+
+  // Get normalized category for filtering
+  const getNormalizedCategory = () => {
+    if (!validCategory) return null;
+    
+    // Map displayed Spanish categories back to database English values for filtering
+    switch(validCategory) {
+      case "furniture": return "muebles";
+      case "electronics": return "electrónica";
+      case "technology": return "tecnología";
+      default: return validCategory;
+    }
+  };
 
   // Get category label
   const getCategoryLabel = () => {
@@ -53,9 +73,12 @@ const CategoryPage = () => {
   };
 
   // Filter products based on category, subcategory, and other filters
-  const filteredProducts = products.filter(product => {
-    // Category filter
-    if (validCategory && product.category !== validCategory) {
+  const filteredProducts = dbProducts.filter(product => {
+    // For debugging
+    console.log("Filtering product:", product.name, "Category:", product.category, "Looking for:", getNormalizedCategory());
+    
+    // Category filter - compare with normalized category
+    if (validCategory && product.category.toLowerCase() !== getNormalizedCategory()) {
       return false;
     }
     
@@ -148,7 +171,7 @@ const CategoryPage = () => {
           {getSubcategoryLabel() || getCategoryLabel()}
         </h1>
         <p className="text-gray-500">
-          {filteredProducts.length} {filteredProducts.length === 1 ? "producto" : "productos"} encontrados
+          {isLoading ? "Cargando productos..." : `${filteredProducts.length} ${filteredProducts.length === 1 ? "producto" : "productos"} encontrados`}
         </p>
       </div>
 
@@ -180,10 +203,16 @@ const CategoryPage = () => {
 
         {/* Products */}
         <div className="lg:col-span-3">
-          <ProductGrid 
-            products={filteredProducts} 
-            title={getSubcategoryLabel() || getCategoryLabel()}
-          />
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <ProductGrid 
+              products={filteredProducts} 
+              title={getSubcategoryLabel() || getCategoryLabel()}
+            />
+          )}
         </div>
       </div>
     </div>

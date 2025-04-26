@@ -1,11 +1,7 @@
 
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, ShieldCheck, Truck, Headphones, CreditCard } from "lucide-react";
-import { products } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "@/services/productService";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
 import ProductShowcase from "@/components/home/ProductShowcase";
@@ -14,18 +10,51 @@ import TestimonialsSection from "@/components/home/TestimonialsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 
 const HomePage = () => {
-  // Get a selection of featured products (one from each category)
-  const featuredProducts = products.filter((product, index) => index < 4);
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts
+  });
   
-  // Get the latest products (most recently added)
+  // Get a selection of featured products (one from each category if possible)
+  const getUniqueByCategory = () => {
+    const categories = ["muebles", "electrónica", "tecnología"];
+    const featured = [];
+    
+    // Try to get one product from each category
+    for (const cat of categories) {
+      const found = products.find(p => p.category.toLowerCase() === cat.toLowerCase());
+      if (found) featured.push(found);
+    }
+    
+    // Fill with other products if needed
+    while (featured.length < 4 && featured.length < products.length) {
+      const remaining = products.filter(p => !featured.includes(p));
+      if (remaining.length === 0) break;
+      featured.push(remaining[0]);
+    }
+    
+    return featured.slice(0, 4);
+  };
+  
+  const featuredProducts = getUniqueByCategory();
+  
+  // Get the latest products (based on their IDs for simplicity)
   const newArrivals = [...products]
     .sort(() => 0.5 - Math.random())
     .slice(0, 4);
   
-  // Get bestsellers (products with highest rating)
+  // Get bestsellers (random for now, could be based on rating later)
   const bestSellers = [...products]
     .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 4);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -7,21 +7,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Search } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
-import { products } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "@/services/productService";
 
 const ShopPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts
+  });
+  
   // Filter products based on search query
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    product.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   // Group products by category
-  const furnitureProducts = products.filter(p => p.category === "furniture");
-  const electronicsProducts = products.filter(p => p.category === "electronics");
-  const technologyProducts = products.filter(p => p.category === "technology");
+  const furnitureProducts = products.filter(p => p.category.toLowerCase() === "muebles");
+  const electronicsProducts = products.filter(p => p.category.toLowerCase() === "electrónica");
+  const technologyProducts = products.filter(p => p.category.toLowerCase() === "tecnología");
+
+  console.log("Categorías disponibles:", products.map(p => p.category));
+  console.log("Productos por categoría:", {
+    muebles: furnitureProducts.length,
+    electronica: electronicsProducts.length,
+    tecnologia: technologyProducts.length
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +66,7 @@ const ShopPage = () => {
       </div>
 
       {/* Category Highlights */}
-      {!searchQuery && (
+      {!searchQuery && !isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
           <div className="relative rounded-lg overflow-hidden h-40 group">
             <img
@@ -117,7 +130,11 @@ const ShopPage = () => {
         </div>
       )}
 
-      {searchQuery ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : searchQuery ? (
         <>
           <h2 className="text-2xl font-semibold mb-6">
             Resultados para "{searchQuery}"
