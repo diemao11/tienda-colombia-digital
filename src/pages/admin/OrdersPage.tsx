@@ -1,4 +1,3 @@
-
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useState } from "react";
 import OrderDetailsModal from "@/components/admin/OrderDetailsModal";
@@ -49,7 +48,7 @@ export default function OrdersPage() {
   const { user } = useAuth();
   
   // Check if user is an admin
-  if (!user || user.email !== 'diemaourquijo@gmail.com') {
+  if (!user || user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 

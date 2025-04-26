@@ -35,7 +35,7 @@ import OrdersPage from "./pages/admin/OrdersPage";
 const queryClient = new QueryClient();
 
 // Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
@@ -44,6 +44,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+  
+  if (adminOnly && user.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
   
   return <>{children}</>;
@@ -77,10 +81,10 @@ const App = () => {
                       <Route path="/auth" element={<AuthPage />} />
                       
                       {/* Rutas del panel de administración */}
-                      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                      <Route path="/admin/productos" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-                      <Route path="/admin/clientes" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
-                      <Route path="/admin/pedidos" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute adminOnly={true}><AdminDashboard /></ProtectedRoute>} />
+                      <Route path="/admin/productos" element={<ProtectedRoute adminOnly={true}><ProductsPage /></ProtectedRoute>} />
+                      <Route path="/admin/clientes" element={<ProtectedRoute adminOnly={true}><CustomersPage /></ProtectedRoute>} />
+                      <Route path="/admin/pedidos" element={<ProtectedRoute adminOnly={true}><OrdersPage /></ProtectedRoute>} />
                       
                       {/* Ruta 404 */}
                       <Route path="*" element={<NotFound />} />

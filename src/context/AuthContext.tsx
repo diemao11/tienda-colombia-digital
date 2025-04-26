@@ -1,11 +1,10 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 
 type AuthContextType = {
-  user: User | null;
+  user: User & { role?: string } | null;
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -16,25 +15,47 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthContextType['user']>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    // First set up the auth state listener
+    const fetchUserRole = async (userId: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return 'user';
+      }
+
+      return data?.role || 'user';
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (session?.user) {
+          const role = await fetchUserRole(session.user.id);
+          setUser({ ...session.user, role });
+        } else {
+          setUser(null);
+        }
         setSession(session);
-        setUser(session?.user ?? null);
         setIsLoading(false);
       }
     );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Initial session check
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const role = await fetchUserRole(session.user.id);
+        setUser({ ...session.user, role });
+      }
       setSession(session);
-      setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
