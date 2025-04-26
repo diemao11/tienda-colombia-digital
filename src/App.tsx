@@ -39,18 +39,23 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: React.React
   const { user, isLoading } = useAuth();
   const location = useLocation();
   
+  console.log("ProtectedRoute checking access. User:", user?.email, "Role:", user?.role, "Admin only:", adminOnly);
+  
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
   }
   
   if (!user) {
+    console.log("No user found, redirecting to auth");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
   
   if (adminOnly && user.role !== 'admin') {
+    console.log("User is not admin, redirecting to home");
     return <Navigate to="/" replace />;
   }
   
+  console.log("Access granted");
   return <>{children}</>;
 };
 

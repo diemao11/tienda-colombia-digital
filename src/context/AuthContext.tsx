@@ -21,48 +21,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchUserRole = async (userId: string) => {
-      try {
-        const { data, error } = await supabase
-          .from('roles')
-          .select('role')
-          .eq('user_id', userId)
-          .single();
+  // Función para obtener el rol del usuario de forma segura
+  const fetchUserRole = async (userId: string) => {
+    try {
+      // Importante: usar maybeSingle en lugar de single para evitar errores cuando no hay resultados
+      const { data, error } = await supabase
+        .from('roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching user role:', error);
-          return 'user';
-        }
-
-        return data?.role || 'user';
-      } catch (error) {
-        console.error('Error in fetchUserRole:', error);
+      if (error) {
+        console.error('Error fetching user role:', error);
         return 'user';
       }
-    };
 
+      console.log('Fetched role data:', data);
+      return data?.role || 'user';
+    } catch (error) {
+      console.error('Error in fetchUserRole:', error);
+      return 'user';
+    }
+  };
+
+  useEffect(() => {
+    // Primero configuramos el listener para cambios en el estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
+        
+        // Actualizamos inmediatamente el estado de sesión (sin esperar)
+        setSession(session);
+        
+        // Si hay un usuario en la sesión, obtenemos su rol
         if (session?.user) {
-          try {
-            const role = await fetchUserRole(session.user.id);
-            console.log('User role:', role);
-            setUser({ ...session.user, role });
-          } catch (error) {
-            console.error('Error setting user with role:', error);
-            setUser(session.user);
-          }
+          // Importante: usar setTimeout para evitar bloqueos con otros listeners
+          setTimeout(async () => {
+            try {
+              const role = await fetchUserRole(session.user.id);
+              console.log('User role:', role);
+              setUser({ ...session.user, role });
+            } catch (error) {
+              console.error('Error setting user with role:', error);
+              setUser(session.user);
+            }
+          }, 0);
         } else {
           setUser(null);
         }
-        setSession(session);
-        setIsLoading(false);
+        
+        if (event !== 'INITIAL_SESSION') {
+          setIsLoading(false);
+        }
       }
     );
 
-    // Initial session check
+    // Luego verificamos si ya existe una sesión
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         try {
